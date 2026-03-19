@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evangelion / MAGI — Sureffi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Outfit:wght@300;400;500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="scanlines" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <nav class="proj-nav">
+        <a href="../index.html" class="nav-logo">SF<span class="accent">_</span></a>
+        <a href="../index.html#projects" class="btn btn-ghost btn-sm">&larr; ALL PROJECTS</a>
+    </nav>
+
+    <section class="proj-hero-section">
+        <div class="container">
+            <span class="proj-tag">&#x2588; Project</span>
+            <h1 class="proj-title">Evangelion / MAGI</h1>
+            <p class="proj-subtitle">AI-powered stock and cryptocurrency analysis terminal with a three-persona MAGI voting system, 15+ technical indicators, and Evangelion-themed UI.</p>
+            <div class="proj-meta">
+                <div class="proj-meta-item">
+                    <span class="proj-meta-label">Role</span>
+                    <span class="proj-meta-value">Lead Developer</span>
+                </div>
+                <div class="proj-meta-item">
+                    <span class="proj-meta-label">Year</span>
+                    <span class="proj-meta-value">2026</span>
+                </div>
+                <div class="proj-meta-item">
+                    <span class="proj-meta-label">Type</span>
+                    <span class="proj-meta-value">Trading Terminal</span>
+                </div>
+            </div>
+            <div class="project-tech">
+                <span>Python</span><span>Textual</span><span>Claude API</span><span>yfinance</span><span>Binance</span><span>pandas</span><span>numpy</span><span>plotext</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-num">01 //</span>
+                <h2 class="section-title">Overview<span class="accent">_</span></h2>
+                <div class="section-rule"></div>
+            </div>
+            <div class="proj-two-col">
+                <div class="proj-content">
+                    <p>A sophisticated terminal-based trading and investment analysis platform. The MAGI system uses three AI personas — Melchior (the Scientist), Balthasar (the Mother), and Caspar (the Woman) — that independently analyze market data and vote on signals, mirroring the MAGI supercomputers from Evangelion.</p>
+                    <p>Each persona evaluates the same technical data through a different lens, producing a consensus signal with confidence levels, risk assessments, and actionable trade plans.</p>
+                </div>
+                <div class="proj-content">
+                    <p>Supports real-time analysis across multiple asset classes — US equities, EU stocks, sector ETFs, and cryptocurrency (via Binance). Data is fetched asynchronously with TTL caching, processed through 15+ technical indicators, and rendered as ASCII charts in the terminal.</p>
+                    <p>Beyond active trading, the platform includes passive income research with dividend analysis, DRIP compound projections, safety scoring, and multi-year income modeling — framed through the Sephiroth tree metaphor.</p>
+                </div>
+            </div>
+
+            <div class="proj-media-grid" style="margin-top: 3rem;">
+                <div class="proj-media">
+                    <img src="../img/Evangelion-MAGI.png" alt="MAGI terminal showing candlestick chart, AI analysis, and technical indicators" loading="lazy">
+                    <span class="proj-media-caption">MAGI Analysis — SPY with AI Signal</span>
+                </div>
+                <div class="proj-media">
+                    <video autoplay muted loop playsinline>
+                        <source src="../video/Evangelion-MAGI.mp4" type="video/mp4">
+                    </video>
+                    <span class="proj-media-caption">Live Demo — MAGI in Action</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-num">02 //</span>
+                <h2 class="section-title">Features<span class="accent">_</span></h2>
+                <div class="section-rule"></div>
+            </div>
+            <div class="proj-features">
+                <div class="feature-card">
+                    <h3>MAGI Voting System</h3>
+                    <p>Three AI personas independently analyze indicators and vote on BUY/SELL/HOLD signals. Consensus builds confidence. Disagreement flags uncertainty.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>15+ Technical Indicators</h3>
+                    <p>RSI, MACD, Bollinger Bands, Ichimoku Cloud, ADX, Stochastic, VWAP, Volume Profile, SMA crossovers, divergence detection, and pivot points.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Universe Scanning</h3>
+                    <p>Scan across crypto, US large cap, EU equities, and sector ETFs. Technical scoring with momentum, trend, and volatility dimensions. Optional AI re-ranking.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Backtesting Engine</h3>
+                    <p>Historical simulation with entry/exit rules. Tracks win rate, average P&L, profit factor, Sharpe ratio, and max consecutive losses.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Passive Income Analysis</h3>
+                    <p>Dividend yield, payout ratio, 5-year growth, DRIP compound projections (1y/5y/10y), safety scoring, and tier ranking (S through D).</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Signal Tracking</h3>
+                    <p>Persistent JSON storage of all signals. Automatic outcome tracking (WIN/LOSS/OPEN) as price moves. Historical performance analytics by symbol and timeframe.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-num">03 //</span>
+                <h2 class="section-title">Architecture<span class="accent">_</span></h2>
+                <div class="section-rule"></div>
+            </div>
+            <div class="proj-arch">
+                <h3>System Design</h3>
+                <p>Built on Textual (TUI framework) with a reactive data flow: symbol selection triggers parallel async fetches (quote, daily/weekly bars, SPY context), indicator computation, and Claude API analysis. The MAGI system prompt embeds three distinct personas that independently evaluate the same data.</p>
+                <p>Multi-panel layout with ASCII candlestick charts, indicator displays, AI analysis panels, and swappable bottom panels for watchlist, scanner, backtest, and income views. TTL caching (60s) prevents redundant API calls. All data fetching is async with graceful error handling.</p>
+                <div class="proj-arch-stack">
+                    <span>Python 3.11+</span><span>Textual</span><span>Rich</span><span>Claude API</span><span>yfinance</span><span>Binance API</span><span>pandas</span><span>numpy</span><span>plotext</span><span>asyncio</span><span>TA library</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="proj-nav-links">
+                <a href="mindos.html" class="proj-nav-link">&larr; Previous<span>MindOS</span></a>
+                <a href="cyberdeck.html" class="proj-nav-link proj-nav-link--next">Next &rarr;<span>muOS Cyberdeck</span></a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&#x2588; BUILT RAW — NO FRAMEWORKS, NO CORPS, NO MASTERS</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CienceTerminal — Sureffi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Outfit:wght@300;400;500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="scanlines" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <nav class="proj-nav">
+        <a href="../index.html" class="nav-logo">SF<span class="accent">_</span></a>
+        <a href="../index.html#projects" class="btn btn-ghost btn-sm">&larr; ALL PROJECTS</a>
+    </nav>
+
+    <section class="proj-hero-section">
+        <div class="container">
+            <span class="proj-tag">&#x2588; Featured Project</span>
+            <h1 class="proj-title">CienceTerminal</h1>
+            <p class="proj-subtitle">Real-time Solana token social signal ingestion platform. Tracks attention before price moves — your edge in Internet Capital Markets.</p>
+            <div class="proj-meta">
+                <div class="proj-meta-item">
+                    <span class="proj-meta-label">Role</span>
+                    <span class="proj-meta-value">Full-Stack & AI Engineer</span>
+                </div>
+                <div class="proj-meta-item">
+                    <span class="proj-meta-label">Year</span>
+                    <span class="proj-meta-value">2025 — Present</span>
+                </div>
+                <div class="proj-meta-item">
+                    <span class="proj-meta-label">Type</span>
+                    <span class="proj-meta-value">SaaS Platform</span>
+                </div>
+            </div>
+            <div class="project-tech">
+                <span>.NET</span><span>AWS ECS</span><span>React</span><span>SignalR</span><span>Solana</span><span>SNS/SQS</span><span>Docker</span><span>Supabase</span>
+            </div>
+            <a href="https://cienceterminal.gitbook.io/cienceterminal-docs/" class="btn btn-ghost btn-sm" target="_blank" rel="noopener" style="margin-top: 1.5rem;">VIEW DOCS &rarr;</a>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-num">01 //</span>
+                <h2 class="section-title">Overview<span class="accent">_</span></h2>
+                <div class="section-rule"></div>
+            </div>
+            <div class="proj-two-col">
+                <div class="proj-content">
+                    <p>CienceTerminal is a real-time ingestion platform that handles high-volume social signal data via WebSockets and REST APIs for Solana tokens. It scans Twitter streams, extracts contract addresses, verifies them on-chain, and delivers tiered alerts to users before price moves.</p>
+                    <p>The platform surfaces attention signals — tracking how many influencers mention a token, the velocity of mentions, and the quality of the accounts pushing them. This gives traders a measurable edge in the memecoin market where attention precedes price action.</p>
+                </div>
+                <div class="proj-content">
+                    <p>Built from scratch as a production SaaS with secure authentication, role-based access controls, and tiered subscription plans. The React frontend was built with a focus on responsiveness, intuitive UX, and real-time interactive visualization of social signals.</p>
+                    <p>Managed full CI/CD pipelines and containerized deployments for automated, reproducible releases across multiple environments.</p>
+                </div>
+            </div>
+
+            <div class="proj-media-grid--video-wide" style="margin-top: 3rem;">
+                <div class="proj-media">
+                    <img src="../img/cienceterminal-main.png" alt="CienceTerminal trending screener with live Solana token data" loading="lazy">
+                    <span class="proj-media-caption">Trending Screener — Live Token Data</span>
+                </div>
+                <div class="proj-media proj-media--phone">
+                    <video autoplay muted loop playsinline>
+                        <source src="../video/CienceTerminalMobile.mov" type="video/quicktime">
+                        <source src="../video/CienceTerminalMobile.mov" type="video/mp4">
+                    </video>
+                    <span class="proj-media-caption">Mobile — Responsive View</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-num">02 //</span>
+                <h2 class="section-title">Features<span class="accent">_</span></h2>
+                <div class="section-rule"></div>
+            </div>
+            <div class="proj-features">
+                <div class="feature-card">
+                    <h3>Real-time Ingestion</h3>
+                    <p>High-volume data pipeline processing social signals via WebSockets and REST APIs. Contract addresses extracted and verified on-chain in real-time.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Attention Scoring</h3>
+                    <p>Tracks mention velocity, influencer quality, and trending signals across Twitter. Surfaces tokens gaining attention before price discovery.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Tiered Alert System</h3>
+                    <p>SignalR websocket push notifications with tier-based access. Pro users receive alerts with lower latency and higher signal fidelity.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Microservices Backend</h3>
+                    <p>AWS-native architecture using ECS containers, SNS/SQS message queues, and event-driven processing for scalable, fault-tolerant operation.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Production React Frontend</h3>
+                    <p>Interactive real-time data visualization, responsive layout, and intuitive UX built for traders.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Auth & Access Control</h3>
+                    <p>Secure authentication with role-based access, subscription management, and tiered feature gating across the platform.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-num">03 //</span>
+                <h2 class="section-title">Architecture<span class="accent">_</span></h2>
+                <div class="section-rule"></div>
+            </div>
+            <div class="proj-arch">
+                <h3>System Design</h3>
+                <p>The backend is built on .NET microservices deployed to AWS ECS. Social data flows through SNS/SQS message queues for decoupled, asynchronous processing. Each service handles a specific domain — ingestion, verification, scoring, and alerting — communicating through events.</p>
+                <p>The frontend connects via SignalR websockets for real-time push updates. Supabase handles user data and auth state. The entire stack is containerized with Docker and deployed through automated CI/CD pipelines.</p>
+                <div class="proj-arch-stack">
+                    <span>.NET Core</span><span>ASP.NET</span><span>SignalR</span><span>AWS ECS</span><span>SNS</span><span>SQS</span><span>React</span><span>Supabase</span><span>Docker</span><span>Solana RPC</span><span>Twitter API</span><span>CI/CD</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="proj-nav-links">
+                <a href="../index.html#projects" class="proj-nav-link">&larr; Back<span>All Projects</span></a>
+                <a href="mindos.html" class="proj-nav-link proj-nav-link--next">Next &rarr;<span>MindOS</span></a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&#x2588; BUILT RAW — NO FRAMEWORKS, NO CORPS, NO MASTERS</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Plant Dashboard — Sureffi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Outfit:wght@300;400;500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="scanlines" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <nav class="proj-nav">
+        <a href="../index.html" class="nav-logo">SF<span class="accent">_</span></a>
+        <a href="../index.html#projects" class="btn btn-ghost btn-sm">&larr; ALL PROJECTS</a>
+    </nav>
+
+    <section class="proj-hero-section">
+        <div class="container">
+            <span class="proj-tag">&#x2588; Project</span>
+            <h1 class="proj-title">Power Plant Dashboard</h1>
+            <p class="proj-subtitle">Cloud-based distributed monitoring system for industrial power plant telemetry with real-time visualization and automated alerting.</p>
+            <div class="proj-meta">
+                <div class="proj-meta-item">
+                    <span class="proj-meta-label">Role</span>
+                    <span class="proj-meta-value">Full-Stack Developer</span>
+                </div>
+                <div class="proj-meta-item">
+                    <span class="proj-meta-label">Year</span>
+                    <span class="proj-meta-value">2022</span>
+                </div>
+                <div class="proj-meta-item">
+                    <span class="proj-meta-label">Type</span>
+                    <span class="proj-meta-value">Industrial IoT</span>
+                </div>
+            </div>
+            <div class="project-tech">
+                <span>C#</span><span>React</span><span>Docker</span><span>AWS</span><span>Microservices</span><span>Message Queues</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-num">01 //</span>
+                <h2 class="section-title">Overview<span class="accent">_</span></h2>
+                <div class="section-rule"></div>
+            </div>
+            <div class="proj-two-col">
+                <div class="proj-content">
+                    <p>A cloud-based monitoring and remote control dashboard for industrial power plant operations. The system handles real-time telemetry ingestion from plant sensors, visualizes operational data through interactive dashboards, and triggers automated alerts when anomalies are detected.</p>
+                    <p>Designed as a distributed microservices architecture to handle the reliability and latency constraints of industrial monitoring — where missed alerts or delayed data can have serious operational consequences.</p>
+                </div>
+                <div class="proj-content">
+                    <p>Built fault-tolerant pipelines for anomaly detection using message queues, ensuring that sensor data is never lost even during processing spikes or service restarts. The system processes telemetry streams continuously and applies threshold-based and pattern-based detection rules.</p>
+                    <p>Managed latency, reliability, and scalability constraints across distributed systems. Automated deployments with Docker and CI/CD pipelines for consistent, reproducible releases.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-num">02 //</span>
+                <h2 class="section-title">Features<span class="accent">_</span></h2>
+                <div class="section-rule"></div>
+            </div>
+            <div class="proj-features">
+                <div class="feature-card">
+                    <h3>Telemetry Ingestion</h3>
+                    <p>Real-time sensor data streaming from industrial equipment. Continuous processing with guaranteed delivery through message queue architecture.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Interactive Dashboards</h3>
+                    <p>React-based visualization of operational metrics — temperature, pressure, output, efficiency — with historical charting and real-time updates.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Anomaly Detection</h3>
+                    <p>Fault-tolerant detection pipelines applying threshold and pattern rules to sensor streams. Catches operational deviations before they escalate.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Automated Alerting</h3>
+                    <p>Multi-level alert system with severity tiers. Notifications dispatched when telemetry exceeds thresholds or anomalous patterns are detected.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Distributed Architecture</h3>
+                    <p>Microservices handling ingestion, processing, visualization, and alerting independently. Designed for fault isolation and independent scaling.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Remote Control</h3>
+                    <p>Secure remote control capabilities for plant operations. Command routing with audit logging and access controls.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-num">03 //</span>
+                <h2 class="section-title">Architecture<span class="accent">_</span></h2>
+                <div class="section-rule"></div>
+            </div>
+            <div class="proj-arch">
+                <h3>System Design</h3>
+                <p>Sensor telemetry flows through message queues into processing services that apply anomaly detection rules and aggregate metrics. The dashboard frontend connects via APIs and WebSocket channels for real-time updates. Alert services monitor processing output and dispatch notifications based on severity configuration.</p>
+                <p>Each service is containerized with Docker and deployed through CI/CD pipelines. The architecture prioritizes data durability — message queues ensure no telemetry is lost during processing delays or service restarts.</p>
+                <div class="proj-arch-stack">
+                    <span>C# / .NET</span><span>React</span><span>AWS</span><span>Docker</span><span>Message Queues</span><span>Microservices</span><span>CI/CD</span><span>WebSocket</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="proj-nav-links">
+                <a href="aclmc.html" class="proj-nav-link">&larr; Previous<span>ACLMC</span></a>
+                <a href="billing.html" class="proj-nav-link proj-nav-link--next">Next &rarr;<span>Customer & Billing System</span></a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&#x2588; BUILT RAW — NO FRAMEWORKS, NO CORPS, NO MASTERS</p>
+        </div>
+    </footer>
+</body>
+</html>

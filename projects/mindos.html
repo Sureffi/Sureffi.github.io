@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindOS — Sureffi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Outfit:wght@300;400;500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="scanlines" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <nav class="proj-nav">
+        <a href="../index.html" class="nav-logo">SF<span class="accent">_</span></a>
+        <a href="../index.html#projects" class="btn btn-ghost btn-sm">&larr; ALL PROJECTS</a>
+    </nav>
+
+    <section class="proj-hero-section">
+        <div class="container">
+            <span class="proj-tag">&#x2588; Project</span>
+            <h1 class="proj-title">MindOS</h1>
+            <p class="proj-subtitle">Three-layer persistent AI memory system with hybrid retrieval, identity modeling, and background memory consolidation.</p>
+            <div class="proj-meta">
+                <div class="proj-meta-item">
+                    <span class="proj-meta-label">Role</span>
+                    <span class="proj-meta-value">Lead Developer</span>
+                </div>
+                <div class="proj-meta-item">
+                    <span class="proj-meta-label">Year</span>
+                    <span class="proj-meta-value">2026 — Present</span>
+                </div>
+                <div class="proj-meta-item">
+                    <span class="proj-meta-label">Type</span>
+                    <span class="proj-meta-value">AI Infrastructure</span>
+                </div>
+            </div>
+            <div class="project-tech">
+                <span>Python</span><span>FastAPI</span><span>Qdrant</span><span>Ollama</span><span>Docker</span><span>Pydantic</span><span>Anthropic SDK</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-num">01 //</span>
+                <h2 class="section-title">Overview<span class="accent">_</span></h2>
+                <div class="section-rule"></div>
+            </div>
+            <div class="proj-two-col">
+                <div class="proj-content">
+                    <p>MindOS is a persistent memory system that gives AI conversations continuity across sessions. It stores what the AI learns about you — your identity, knowledge, and conversational history — and retrieves the right context at the right time.</p>
+                    <p>The system uses three distinct memory layers: Identity (always loaded), Knowledge (semantic retrieval), and Episodic (conversation summaries). Each layer serves a different purpose in reconstructing context for natural, continuous interaction.</p>
+                </div>
+                <div class="proj-content">
+                    <p>Retrieval uses a hybrid approach combining BM25 keyword search (30%) with vector similarity search (70%), using Qdrant for storage and Ollama embeddings. This ensures both precise keyword matches and semantic understanding when surfacing relevant memories.</p>
+                    <p>After each conversation, a background task extracts new memories using LLM tool calling — storing episodic summaries, knowledge facts, and identity updates. A consolidation system promotes emerging patterns to confirmed insights over time.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-num">02 //</span>
+                <h2 class="section-title">Features<span class="accent">_</span></h2>
+                <div class="section-rule"></div>
+            </div>
+            <div class="proj-features">
+                <div class="feature-card">
+                    <h3>Three-Layer Memory</h3>
+                    <p>Identity (always-loaded user model), Knowledge (factual semantic retrieval), and Episodic (conversation summaries with metadata).</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Hybrid Retrieval</h3>
+                    <p>BM25 (30%) + vector search (70%) union merge. BM25 index rebuilt from Qdrant on startup. Embeddings via Ollama nomic-embed-text (768 dims).</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Dual LLM Providers</h3>
+                    <p>Chat and memory extraction use different providers. Supports Anthropic, DeepSeek, Kimi, and Claude CLI. Provider hot-switchable at runtime.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Background Extraction</h3>
+                    <p>After each chat turn, a background task calls the LLM with tool use to extract episodic, knowledge, and identity updates automatically.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Pattern Consolidation</h3>
+                    <p>Reviews episodic memories over time, promotes patterns from emerging to confirmed, rewrites the identity narrative, and proposes merges and prunes.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>TUI Client</h3>
+                    <p>Terminal-based chat interface with the server. Supports export/import of memories across instances for portability.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-num">03 //</span>
+                <h2 class="section-title">Architecture<span class="accent">_</span></h2>
+                <div class="section-rule"></div>
+            </div>
+            <div class="proj-arch">
+                <h3>System Design</h3>
+                <p>User message flows through FastAPI to the retrieval layer, which loads identity (always) and performs hybrid search for relevant knowledge and episodic memories. The composed context is sent to the chat LLM with optional tool execution. After the response, a background extraction task stores new memories in Qdrant.</p>
+                <p>The identity layer uses a structured YAML schema (v2) with dot-notation paths for updates. Field aliases handle LLM hallucinations and v1 migration. The entire system is async with Pydantic v2 models throughout.</p>
+                <div class="proj-arch-stack">
+                    <span>FastAPI</span><span>Qdrant</span><span>Ollama</span><span>Anthropic SDK</span><span>httpx</span><span>Pydantic v2</span><span>Docker Compose</span><span>asyncio</span><span>BM25</span><span>nomic-embed-text</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="proj-nav-links">
+                <a href="cienceterminal.html" class="proj-nav-link">&larr; Previous<span>CienceTerminal</span></a>
+                <a href="evangelion.html" class="proj-nav-link proj-nav-link--next">Next &rarr;<span>Evangelion / MAGI</span></a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&#x2588; BUILT RAW — NO FRAMEWORKS, NO CORPS, NO MASTERS</p>
+        </div>
+    </footer>
+</body>
+</html>

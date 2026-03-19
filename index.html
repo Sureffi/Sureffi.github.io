@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sureffi — Full-Stack & AI Engineer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Outfit:wght@300;400;500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="booting">
+
+    <!-- Boot Sequence Overlay -->
+    <div class="boot" id="boot">
+        <div class="boot-inner">
+            <div class="boot-lines" id="bootLines"></div>
+        </div>
+    </div>
+
+    <!-- CRT Overlays -->
+    <div class="scanlines" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <!-- Navigation -->
+    <nav class="nav" id="nav">
+        <a href="#" class="nav-logo">SF<span class="accent">_</span></a>
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#about">About</a></li>
+            <li><a href="#skills">Skills</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#experience">Experience</a></li>
+            <li><a href="#contact" class="nav-cta">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero" id="hero">
+        <canvas id="heroCanvas" aria-hidden="true"></canvas>
+
+        <!-- HUD frame corners -->
+        <div class="hud-corner hud-tl"></div>
+        <div class="hud-corner hud-tr"></div>
+        <div class="hud-corner hud-bl"></div>
+        <div class="hud-corner hud-br"></div>
+
+        <!-- HUD data readouts -->
+        <div class="hud-data hud-data-tl">
+            <span>NET://SUREFFI</span>
+            <span>BUILD 2.077</span>
+        </div>
+        <div class="hud-data hud-data-br">
+            <span>60.17&#xB0;N 24.94&#xB0;E</span>
+            <span>STATUS: ONLINE</span>
+        </div>
+
+        <div class="hero-content">
+            <div class="hero-badge hero-reveal">
+                <span class="badge-pulse"></span>
+                FULL-STACK & AI ENGINEER // BUILDER
+            </div>
+            <h1 class="hero-name glitch" data-text="SUREFFI">SUREFFI</h1>
+            <p class="hero-tagline hero-reveal">
+                <span class="tg-prompt">&gt;</span> I build <span class="typed-text"></span><span class="cursor">&#x2588;</span>
+            </p>
+            <div class="hero-cta hero-reveal">
+                <a href="#projects" class="btn btn-primary">VIEW MY WORK</a>
+                <a href="#contact" class="btn btn-ghost">GET IN TOUCH</a>
+            </div>
+        </div>
+
+        <div class="scroll-indicator hero-reveal">
+            <div class="scroll-line"></div>
+        </div>
+    </section>
+
+    <!-- About -->
+    <section class="about section" id="about">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-num">01 //</span>
+                <h2 class="section-title">About<span class="accent">_</span></h2>
+                <div class="section-rule"></div>
+            </div>
+            <!-- Quick stats bar — what recruiters scan first -->
+            <div class="about-stats reveal">
+                <div class="stat">
+                    <span class="stat-value">8+</span>
+                    <span class="stat-label">Years Coding</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">Full</span>
+                    <span class="stat-label">Stack + AI + Web3</span>
+                </div>
+            </div>
+
+            <div class="about-grid">
+                <div class="about-text reveal">
+                    <p class="about-lead">I build systems that process chaos — high-volume blockchain data, real-time social signals, and market patterns that most pipelines can't handle at speed.</p>
+                    <p>End-to-end across the stack — from AWS backends and on-chain analysis tools to React interfaces and deep learning models. Currently focused on crypto infrastructure and Internet Capital Markets, building the tools that give traders an edge before the signal goes mainstream.</p>
+                </div>
+                <div class="about-visual reveal">
+                    <div class="term">
+                        <div class="term-chrome">
+                            <span class="term-dot"></span>
+                            <span class="term-dot"></span>
+                            <span class="term-dot"></span>
+                            <span class="term-path">&gt; cat about.json</span>
+                        </div>
+                        <div class="term-body">
+                            <div class="term-scan"></div>
+                            <pre><code>{
+  <span class="tk">"handle"</span>: <span class="tv">"Sureffi"</span>,
+  <span class="tk">"location"</span>: <span class="tv">"60.17&#xB0;N, 24.94&#xB0;E"</span>,
+  <span class="tk">"status"</span>: <span class="tv">"building"</span>,
+  <span class="tk">"current_focus"</span>: <span class="tv">"Internet Capital Markets"</span>,
+  <span class="tk">"approach"</span>: <span class="tv">"architect it, ship it, measure it"</span>,
+  <span class="tk">"built_with"</span>: <span class="tv">"no frameworks, no templates"</span>,
+  <span class="tk">"motto"</span>: <span class="tv">"Chaos in, signal out."</span>
+}</code></pre>
+                            <p class="term-prompt">&gt; <span class="blink">_</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills -->
+    <section class="skills section" id="skills">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-num">02 //</span>
+                <h2 class="section-title">Skills<span class="accent">_</span></h2>
+                <div class="section-rule"></div>
+            </div>
+            <div class="skills-grid">
+                <div class="skill-card reveal" style="--glow: var(--cyan)">
+                    <span class="skill-icon">PY</span>
+                    <span class="skill-name">Python</span>
+                    <span class="skill-cat">LANGUAGE</span>
+                </div>
+                <div class="skill-card reveal" style="--glow: var(--yellow)">
+                    <span class="skill-icon">TS</span>
+                    <span class="skill-name">TypeScript</span>
+                    <span class="skill-cat">LANGUAGE</span>
+                </div>
+                <div class="skill-card reveal" style="--glow: var(--red)">
+                    <span class="skill-icon">C#</span>
+                    <span class="skill-name">C# / .NET / ASP.NET</span>
+                    <span class="skill-cat">BACKEND</span>
+                </div>
+                <div class="skill-card reveal" style="--glow: var(--cyan)">
+                    <span class="skill-icon">&#x1F525;</span>
+                    <span class="skill-name">PyTorch / ML</span>
+                    <span class="skill-cat">AI & DATA</span>
+                </div>
+                <div class="skill-card reveal" style="--glow: var(--yellow)">
+                    <span class="skill-icon">&#x269B;</span>
+                    <span class="skill-name">React</span>
+                    <span class="skill-cat">FRONTEND</span>
+                </div>
+                <div class="skill-card reveal" style="--glow: var(--red)">
+                    <span class="skill-icon">AWS</span>
+                    <span class="skill-name">AWS / Azure</span>
+                    <span class="skill-cat">CLOUD</span>
+                </div>
+                <div class="skill-card reveal" style="--glow: var(--cyan)">
+                    <span class="skill-icon">&#x2B21;</span>
+                    <span class="skill-name">Docker / K8s</span>
+                    <span class="skill-cat">DEVOPS</span>
+                </div>
+                <div class="skill-card reveal" style="--glow: var(--yellow)">
+                    <span class="skill-icon">&#x25CE;</span>
+                    <span class="skill-name">Solana / Web3</span>
+                    <span class="skill-cat">BLOCKCHAIN</span>
+                </div>
+                <div class="skill-card reveal" style="--glow: var(--red)">
+                    <span class="skill-icon">&#x25C8;</span>
+                    <span class="skill-name">Microservices</span>
+                    <span class="skill-cat">ARCHITECTURE</span>
+                </div>
+                <div class="skill-card reveal" style="--glow: var(--cyan)">
+                    <span class="skill-icon">&#x2699;</span>
+                    <span class="skill-name">CI/CD Pipelines</span>
+                    <span class="skill-cat">INFRA</span>
+                </div>
+                <div class="skill-card reveal" style="--glow: var(--yellow)">
+                    <span class="skill-icon">&#x26A1;</span>
+                    <span class="skill-name">LLM / Prompt Eng</span>
+                    <span class="skill-cat">AI</span>
+                </div>
+                <div class="skill-card reveal" style="--glow: var(--red)">
+                    <span class="skill-icon">&#x25B2;</span>
+                    <span class="skill-name">Real-time Systems</span>
+                    <span class="skill-cat">ARCHITECTURE</span>
+                </div>
+                <div class="skill-card reveal" style="--glow: var(--cyan)">
+                    <span class="skill-icon">&#x25D0;</span>
+                    <span class="skill-name">Frontend Design</span>
+                    <span class="skill-cat">UI / UX</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects -->
+    <section class="projects section" id="projects">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-num">03 //</span>
+                <h2 class="section-title">Projects<span class="accent">_</span></h2>
+                <div class="section-rule"></div>
+            </div>
+
+            <div class="project-featured reveal">
+                <!-- Animated border scanner -->
+                <div class="pf-border-scan"></div>
+                <div class="project-featured-body">
+                    <div class="project-featured-text">
+                        <span class="project-tag">&#x2588; FEATURED PROJECT</span>
+                        <h3 class="project-name">CienceTerminal</h3>
+                        <p class="project-desc">Real-time ingestion platform handling high-volume social signal data via WebSockets and REST APIs for Solana tokens. Microservices backend on AWS with Docker containers and message queues. Production-grade React frontend with interactive real-time visualization, secure auth, and role-based access.</p>
+                        <div class="project-tech">
+                            <span>.NET</span><span>AWS ECS</span><span>React</span><span>SignalR</span><span>Solana</span><span>SNS/SQS</span><span>Docker</span>
+                        </div>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <a href="projects/cienceterminal.html" class="btn btn-primary btn-sm">VIEW PROJECT &rarr;</a>
+                            <a href="https://cienceterminal.gitbook.io/cienceterminal-docs/" class="btn btn-ghost btn-sm" target="_blank" rel="noopener">DOCS &rarr;</a>
+                        </div>
+                    </div>
+                    <div class="project-featured-visual">
+                        <div class="proj-media">
+                            <img src="img/cienceterminal-main.png" alt="CienceTerminal trending screener showing real-time Solana token data" loading="lazy">
+                            <span class="proj-media-caption">Trending Screener — Live Token Data</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="projects-grid">
+                <a href="projects/mindos.html" class="project-card reveal">
+                    <span class="project-tag">&#x2588; PROJECT</span>
+                    <h3 class="project-name">MindOS</h3>
+                    <p class="project-desc">Persistent AI memory system with three-layer architecture: identity, knowledge, and episodic memory. Hybrid retrieval (BM25 + vector search), dual LLM provider system, background memory extraction, and pattern consolidation.</p>
+                    <div class="project-tech">
+                        <span>Python</span><span>FastAPI</span><span>Qdrant</span><span>Ollama</span><span>Docker</span><span>Pydantic</span>
+                    </div>
+                </a>
+                <a href="projects/evangelion.html" class="project-card reveal">
+                    <img src="img/Evangelion-MAGI.png" alt="MAGI terminal" class="project-card-img" loading="lazy">
+                    <span class="project-tag">&#x2588; PROJECT</span>
+                    <h3 class="project-name">Evangelion / MAGI</h3>
+                    <p class="project-desc">AI-powered stock and crypto analysis terminal. Three-persona MAGI voting system (Claude), 15+ technical indicators, backtesting engine, dividend/DRIP projections, and real-time universe scanning across equities and crypto.</p>
+                    <div class="project-tech">
+                        <span>Python</span><span>Textual</span><span>Claude API</span><span>yfinance</span><span>Binance</span><span>pandas</span>
+                    </div>
+                </a>
+                <a href="projects/cyberdeck.html" class="project-card reveal">
+                    <img src="img/cyberdeck-1.jpg" alt="muOS Cyberdeck interface" class="project-card-img" loading="lazy">
+                    <span class="project-tag">&#x2588; PROJECT</span>
+                    <h3 class="project-name">muOS Cyberdeck</h3>
+                    <p class="project-desc">Cyberpunk 2077-inspired cyberdeck interface for the Anbernic RG35XX-H handheld. 21 network/system modules, 5 hidden Blackwall tools unlocked via Konami code, ghost AI personality, digital rain effects, and procedural sound.</p>
+                    <div class="project-tech">
+                        <span>Python</span><span>pygame</span><span>SDL2</span><span>muOS</span><span>ARM</span>
+                    </div>
+                </a>
+                <a href="projects/cabalhunter.html" class="project-card reveal">
+                    <span class="project-tag">&#x2588; PROJECT</span>
+                    <h3 class="project-name">CabalHunter</h3>
+                    <p class="project-desc">Microservices pipelines for high-volume on-chain event ingestion. Pattern-analysis logic to detect synchronized and anomalous behaviors in token launches. Reverse-engineered Pump.fun "Mayhem" IDL within 24 hours.</p>
+                    <div class="project-tech">
+                        <span>Python</span><span>Solana</span><span>Docker</span><span>WebSocket</span>
+                    </div>
+                </a>
+                <a href="projects/llm-chatbot.html" class="project-card reveal">
+                    <span class="project-tag">&#x2588; PROJECT</span>
+                    <h3 class="project-name">LLM Telegram Chatbot</h3>
+                    <p class="project-desc">Chatbot platform using LLMs with multiple celebrity personalities cloned. Multi-tenant architecture with credit-based usage, subscription management, and dynamic personality switching.</p>
+                    <div class="project-tech">
+                        <span>Python</span><span>LLM</span><span>Docker</span><span>Azure</span>
+                    </div>
+                </a>
+                <a href="projects/aclmc.html" class="project-card reveal">
+                    <span class="project-tag">&#x2588; PROJECT</span>
+                    <h3 class="project-name">ACLMC — Market Prediction</h3>
+                    <p class="project-desc">Deep learning experiments for financial time-series. Built pipelines for labeling, feature extraction, and dataset generation. Developed LSTM, ConvLSTM, and attention-based models for non-stationary market prediction.</p>
+                    <div class="project-tech">
+                        <span>Python</span><span>PyTorch</span><span>LSTM</span><span>ConvLSTM</span>
+                    </div>
+                </a>
+                <a href="projects/powerplant.html" class="project-card reveal">
+                    <span class="project-tag">&#x2588; PROJECT</span>
+                    <h3 class="project-name">Power Plant Dashboard</h3>
+                    <p class="project-desc">Cloud-based distributed monitoring system for industrial power plant telemetry. Real-time ingestion, visualization, automated alerts, and fault-tolerant anomaly detection pipelines.</p>
+                    <div class="project-tech">
+                        <span>C#</span><span>React</span><span>Docker</span><span>AWS</span>
+                    </div>
+                </a>
+                <a href="projects/billing.html" class="project-card reveal">
+                    <span class="project-tag">&#x2588; PROJECT</span>
+                    <h3 class="project-name">Customer & Billing System</h3>
+                    <p class="project-desc">End-to-end customer management and billing platform for trade companies. Client onboarding, invoicing, payment tracking, automated reminders, and real-time dashboards.</p>
+                    <div class="project-tech">
+                        <span>C#</span><span>React</span><span>AWS</span><span>Microservices</span>
+                    </div>
+                </a>
+                <a href="projects/fivem.html" class="project-card reveal">
+                    <span class="project-tag">&#x2588; PROJECT</span>
+                    <h3 class="project-name">FiveM Lua Mod Menu</h3>
+                    <p class="project-desc">First Lua-based mod menu for the FiveM multiplayer framework. Reverse-engineered client/server behavior for real-time modular scripting and runtime control.</p>
+                    <div class="project-tech">
+                        <span>Lua</span><span>FiveM</span><span>Reverse Engineering</span>
+                    </div>
+                </a>
+                <a href="https://sureffi.github.io/pattern-language/art/gallery.html" class="project-card reveal" target="_blank" rel="noopener">
+                    <span class="project-tag">&#x2588; PROJECT</span>
+                    <h3 class="project-name">Pattern Language</h3>
+                    <p class="project-desc">Ten generative art studies in emergent form. Flow fields, crystal growth, n-body gravity, wave interference, flocking, terrain, surveillance eyes, face pareidolia, and liberation narratives — zero dependencies, pure canvas.</p>
+                    <div class="project-tech">
+                        <span>JavaScript</span><span>Canvas API</span><span>Perlin Noise</span><span>Generative Art</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience -->
+    <section class="experience section" id="experience">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-num">04 //</span>
+                <h2 class="section-title">Experience<span class="accent">_</span></h2>
+                <div class="section-rule"></div>
+            </div>
+            <div class="timeline">
+                <div class="timeline-item reveal">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-body">
+                        <span class="timeline-date">2026 &mdash; PRESENT</span>
+                        <h3 class="timeline-role">MindOS &mdash; Lead Developer</h3>
+                        <p>Three-layer persistent AI memory system with hybrid retrieval. Identity modeling, episodic summaries, and knowledge extraction via dual LLM providers. Vector search with Qdrant, background memory consolidation, and TUI client.</p>
+                        <div class="timeline-tech">
+                            <span>Python</span><span>FastAPI</span><span>Qdrant</span><span>Ollama</span><span>Docker</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-item reveal">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-body">
+                        <span class="timeline-date">2026</span>
+                        <h3 class="timeline-role">Evangelion / MAGI &mdash; Lead Developer</h3>
+                        <p>AI-powered trading terminal with three-persona MAGI voting system using Claude. Real-time multi-asset analysis across equities and crypto, backtesting engine, passive income research with DRIP projections, and signal tracking with performance stats.</p>
+                        <div class="timeline-tech">
+                            <span>Python</span><span>Textual</span><span>Claude API</span><span>Binance</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-item reveal">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-body">
+                        <span class="timeline-date">2026</span>
+                        <h3 class="timeline-role">muOS Cyberdeck &mdash; Lead Developer</h3>
+                        <p>Cyberpunk-themed cyberdeck interface for Anbernic RG35XX-H handheld running muOS. 26 tool modules across network, system, and security categories. Ghost AI, discovery system, digital rain, 5 color themes, and procedural audio — all in pygame at 640x480 for gamepad-only input.</p>
+                        <div class="timeline-tech">
+                            <span>Python</span><span>pygame</span><span>SDL2</span><span>muOS</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-item reveal">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-body">
+                        <span class="timeline-date">2025 &mdash; PRESENT</span>
+                        <h3 class="timeline-role">CienceTerminal &mdash; Full-Stack & AI Engineer</h3>
+                        <p>Real-time ingestion platform for Solana token social signals. Microservices backend on AWS, production React frontend, secure auth, CI/CD pipelines, and containerized deployments.</p>
+                        <div class="timeline-tech">
+                            <span>.NET</span><span>AWS</span><span>React</span><span>Docker</span><span>SignalR</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-item reveal">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-body">
+                        <span class="timeline-date">2025</span>
+                        <h3 class="timeline-role">CabalHunter &mdash; Lead Developer</h3>
+                        <p>High-volume on-chain event ingestion pipelines. Pattern-analysis for detecting synchronized token launch behaviors. Reverse-engineered Pump.fun "Mayhem" IDL within 24 hours. Low-latency processing in adversarial blockchain environments.</p>
+                        <div class="timeline-tech">
+                            <span>Python</span><span>Solana</span><span>Docker</span><span>WebSocket</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-item reveal">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-body">
+                        <span class="timeline-date">2024</span>
+                        <h3 class="timeline-role">LLM Telegram Chatbot &mdash; AI & Full-Stack Engineer</h3>
+                        <p>Telegram chatbot platform with LLM-powered celebrity personality clones. Multi-tenant architecture, credit-based billing, real-time chat pipelines, dynamic personality switching, and cloud GPU optimization on Azure.</p>
+                        <div class="timeline-tech">
+                            <span>Python</span><span>LLM</span><span>Docker</span><span>Azure</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-item reveal">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-body">
+                        <span class="timeline-date">2023</span>
+                        <h3 class="timeline-role">Billing Platform &mdash; Full-Stack & Cloud Engineer</h3>
+                        <p>End-to-end customer management and billing platform for trade companies. RESTful APIs, React dashboards, message queues for async processing, multi-tenant architecture on AWS.</p>
+                        <div class="timeline-tech">
+                            <span>C#</span><span>React</span><span>AWS</span><span>Microservices</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-item reveal">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-body">
+                        <span class="timeline-date">2022</span>
+                        <h3 class="timeline-role">Power Plant Dashboard &mdash; Full-Stack Developer</h3>
+                        <p>Cloud-based distributed monitoring for industrial power plant telemetry. Microservices handling real-time ingestion, visualization, automated alerts, and fault-tolerant anomaly detection.</p>
+                        <div class="timeline-tech">
+                            <span>C#</span><span>React</span><span>Docker</span><span>AWS</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section class="contact section" id="contact">
+        <div class="container">
+            <div class="contact-inner">
+                <div class="section-header reveal">
+                    <span class="section-num">05 //</span>
+                    <h2 class="section-title">Let's Talk<span class="accent">_</span></h2>
+                    <div class="section-rule"></div>
+                </div>
+                <p class="contact-text reveal">Looking for a Full-Stack & AI Engineer? Need someone who can build real-time systems, ML pipelines, or Web3 tools from scratch? Let's talk.</p>
+                <div class="contact-links reveal">
+                    <a href="mailto:sureffi@proton.me" class="btn btn-primary btn-lg">SUREFFI@PROTON.ME</a>
+                    <a href="https://github.com/Sureffi" class="btn btn-ghost btn-lg" target="_blank" rel="noopener">GITHUB &rarr;</a>
+                    <a href="https://x.com/Sureffi" class="btn btn-ghost btn-lg" target="_blank" rel="noopener">X / TWITTER &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&#x2588; BUILT RAW — NO FRAMEWORKS, NO CORPS, NO MASTERS</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
