@@ -14,12 +14,12 @@
     }
 
     :root {
-      --ink:  #a5e3dd;                 /* resolved text */
+      --ink:  #c3dad4;                 /* resolved text — desaturated, reads calm */
       --cyan: #2af5e6;                 /* links */
       --dim:  rgba(42, 245, 230, .26);
       --mag:  #ff3df0;                 /* sigils, selection */
       --red:  #ff2a3c;                 /* heat */
-      --rose: #ffa9b3;                 /* the wall's voice, headings */
+      --rose: #ffe9e4;                 /* white-hot — the wall's voice, headings */
       --gut:  clamp(18px, 4vw, 64px);
     }
     * { box-sizing: border-box; }
@@ -40,7 +40,7 @@
         text-shadow: 0 0 8px var(--dim), 0 1px 2px rgba(0, 0, 0, .9); }
     a:hover { color: var(--rose);
               text-shadow: 0 0 9px rgba(255, 42, 60, .35), 0 1px 2px rgba(0, 0, 0, .9); }
-    a:visited { color: var(--mag); }
+    a:visited { color: #cd7fd6; }
 
     /* the wall, behind everything you read. one layer, one canvas: the
        embers, the glass raster and the vignette all live inside the blit
@@ -73,8 +73,8 @@
     .masthead { margin-bottom: clamp(28px, 6vh, 56px); }
     #title {
       margin: 0; font-size: clamp(28px, 7vw, 52px); line-height: 1.1;
-      color: var(--rose); letter-spacing: .04em;
-      text-shadow: 0 0 12px rgba(255, 42, 60, .25), 0 1px 2px rgba(0, 0, 0, .9);
+      color: #ffe9e4; letter-spacing: .04em;      /* white-hot */
+      text-shadow: 0 0 13px rgba(255, 42, 60, .50), 0 1px 2px rgba(0, 0, 0, .9);
     }
     .tagline { margin: .5em 0 0; color: var(--cyan);
                text-shadow: 0 0 8px var(--dim), 0 1px 2px rgba(0, 0, 0, .9); }
@@ -102,7 +102,7 @@
     #page { text-align: left; width: 100%;
             max-width: min(720px, calc(100vw - 2 * var(--gut))); }
     .masthead { text-align: center; }
-    .plainline { color: #6b8f8a; margin: .4em 0 0; text-align: center; }
+    .plainline { color: #83a69f; margin: .4em 0 0; text-align: center; }
     .lead { margin: 0 0 clamp(28px, 6vh, 52px); }
     .lead video, .exhibit img { display: block; width: 100%;
       border: 1px solid rgba(255, 42, 60, .28); background: #000; }
@@ -111,11 +111,13 @@
     .exhibit { display: grid; grid-template-columns: 84px 1fr; gap: 0 22px;
       padding: 20px 0; border-top: 1px solid rgba(165, 227, 221, .12); }
     .exhibit:last-of-type { border-bottom: 1px solid rgba(165, 227, 221, .12); }
-    .when { color: #7c5860; font-size: 13px; padding-top: 3px; }
-    .what h3 { margin: 0; font-size: 15px; font-weight: normal;
+    .when { color: #977079; font-size: 13px; padding-top: 3px; }
+    .what h3 { margin: 0 0 2px; font-size: 24px; font-weight: normal;
       color: var(--rose); letter-spacing: .06em; }
+    .what h3 a, .what h3 a:visited { color: var(--rose); }
+    .what h3 a:hover { color: var(--cyan); }
     .what p { margin: .5em 0 0; max-width: none; }
-    .note { color: #6b8f8a; }
+    .note { color: #83a69f; }
     .witness { color: #6b8f8a; margin-top: 1.2em; }
     @media (max-width: 560px) {
       .exhibit { grid-template-columns: 1fr; gap: 2px; }
@@ -1047,6 +1049,7 @@
               hue = 7; lvl = ((20 + (ab >> 4)) * vg) >> 8; if (lvl > MAX) lvl = MAX;
               if (v > lvl) { hue = 0; lvl = v; }
             } else lvl = v;
+            if (cm) lvl = (lvl * (270 - cm)) >> 8;   // the clearing holds
           } else {
             const cl = CL[c8];
             if (v >= cl) lvl = v;
@@ -1076,7 +1079,7 @@
           c8 = (c8 * vg) >> 8;
           const v = (cur[si] * vg) >> 8;
           let hue = 0, lvl;
-          if (hard[si]) lvl = v;
+          if (hard[si]) { lvl = v; if (cm) lvl = (lvl * (270 - cm)) >> 8; }
           else {
             const cl = CL[c8];
             if (v >= cl) lvl = v;
@@ -1332,6 +1335,9 @@
     document.addEventListener('pointerdown', e => {
       if (!window.deck || !deck.wall) return;
       if (window.getSelection && String(getSelection())) return;   // not mid-select
+      if (e.target.closest && e.target.closest(
+        'a, p, h1, h2, h3, figcaption, video, img, .when, .what, .section-head'))
+        return;                      // the words are not the wall
       const p = deck.wall.screenToWall(e.clientX, e.clientY);
       deck.wall.tear(p[0], p[1]);
     });
