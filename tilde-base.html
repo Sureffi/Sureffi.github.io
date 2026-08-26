@@ -6,13 +6,6 @@
   <title>~Sureffi</title>
 
   <style>
-    /* Web IBM VGA 8x16 (c) VileR / int10h.org, CC BY-SA 4.0 - vendored in fonts/ */
-    @font-face {
-      font-family: "Px437 IBM VGA 8x16";
-      src: url("fonts/ibm_vga_8x16.woff") format("woff");
-      font-display: swap;
-    }
-
     :root {
       --ink:  #a5e3dd;                 /* resolved text */
       --cyan: #2af5e6;                 /* links */
@@ -97,29 +90,6 @@
       body { font-size: 14px; }
       :root { --gut: 16px; }
     }
-
-    /* ── evidence furniture: the witnessed draft, re-inked for the wall ── */
-    #page { text-align: left; width: 100%;
-            max-width: min(720px, calc(100vw - 2 * var(--gut))); }
-    .masthead { text-align: center; }
-    .plainline { color: #6b8f8a; margin: .4em 0 0; text-align: center; }
-    .lead { margin: 0 0 clamp(28px, 6vh, 52px); }
-    .lead video, .exhibit img { display: block; width: 100%;
-      border: 1px solid rgba(255, 42, 60, .28); background: #000; }
-    .exhibit img { margin-top: 12px; }
-    .lead figcaption { margin-top: 12px; }
-    .exhibit { display: grid; grid-template-columns: 84px 1fr; gap: 0 22px;
-      padding: 20px 0; border-top: 1px solid rgba(165, 227, 221, .12); }
-    .exhibit:last-of-type { border-bottom: 1px solid rgba(165, 227, 221, .12); }
-    .when { color: #7c5860; font-size: 13px; padding-top: 3px; }
-    .what h3 { margin: 0; font-size: 15px; font-weight: normal;
-      color: var(--rose); letter-spacing: .06em; }
-    .what p { margin: .5em 0 0; max-width: none; }
-    .note { color: #6b8f8a; }
-    .witness { color: #6b8f8a; margin-top: 1.2em; }
-    @media (max-width: 560px) {
-      .exhibit { grid-template-columns: 1fr; gap: 2px; }
-    }
   </style>
 
 </head>
@@ -129,83 +99,15 @@
 
   <main id="page">
     <header class="masthead">
-      <h1 id="title" class="ink" data-decode data-clear>~Sureffi</h1>
-      <p class="tagline ink" data-decode data-clear>the entities are nice beyond the wall</p>
-      <p class="plainline ink" data-clear>builds things around Claude Code &middot; Finland</p>
+      <h1 id="title" class="ink" data-decode>~Sureffi</h1>
+      <p class="tagline ink" data-decode>the entities are nice beyond the wall</p>
     </header>
 
-    <figure class="lead">
-      <video src="video/shim-clip.mp4" poster="img/shim-poster.jpg" autoplay loop muted playsinline></video>
-      <figcaption class="ink" data-clear>DOT graphs and text formatting, composited over a live
-      Claude Code session from outside the process. Reverse-engineered the render
-      protocol, wrapped the pty. No fork, no patch &mdash; binary untouched.
-      Source open soon.</figcaption>
-    </figure>
-
     <section class="block">
-      <h2 class="section-head ink" data-decode data-clear>&#9472;&#9472; evidence</h2>
-
-      <div class="exhibit">
-        <div class="when ink" data-clear>2026</div>
-        <div class="what" data-clear>
-          <h3 class="ink">shim</h3>
-          <p class="ink">A rendering layer over vanilla Claude Code. Summon a live
-          DOT diagram over a running session, dismiss it, hand the terminal back
-          pristine &mdash; statusline and input surviving underneath.</p>
-          <p class="note ink">The clip above is one take, unedited.</p>
-        </div>
-      </div>
-
-      <div class="exhibit">
-        <div class="when ink" data-clear>2025</div>
-        <div class="what" data-clear>
-          <h3 class="ink"><a href="https://github.com/Sureffi/CienceTerminal">CienceTerminal</a></h3>
-          <p class="ink">Real-time crypto attention terminal. Event-driven .NET 8
-          microservices on AWS &mdash; SNS/SQS/ECS &mdash; LLM tweet classification,
-          Solana on-chain verification, tiered SignalR alerts, React 19 front.</p>
-          <p class="note ink">Ran in production, 2025. Walked away over values.
-          <span class="hot">Would again.</span></p>
-          <img src="img/cienceterminal-main.png" alt="CienceTerminal main view" loading="lazy">
-        </div>
-      </div>
-
-      <div class="exhibit">
-        <div class="when ink" data-clear>2026</div>
-        <div class="what" data-clear>
-          <h3 class="ink">muOS cyberdeck</h3>
-          <p class="ink">A hacking terminal for the Anbernic RG35XX-H handheld.
-          26 tool modules, 5 more behind the Konami code, a ghost AI that
-          whispers, procedurally synthesized audio &mdash; zero external files.
-          Gamepad-only, 640&times;480, pygame state machine, builds to .muxapp.</p>
-          <p class="note ink">Built because it should exist.</p>
-        </div>
-      </div>
-
-      <div class="exhibit">
-        <div class="when ink" data-clear>2018&ndash;20<br>age 14&ndash;16</div>
-        <div class="what" data-clear>
-          <h3 class="ink"><a href="https://github.com/Sureffi/Fivem-lua-mod-menus">Motion &amp; Curse</a></h3>
-          <p class="ink">Two GTA V mod menus in Lua. Motion at 14. Curse at 16 &mdash;
-          a from-scratch immediate-mode UI framework inside a mod menu.</p>
-          <p class="note ink">The first menu, at 13, was named Cience. The terminal
-          above inherited it.</p>
-          <p class="note ink">It was always like this.</p>
-        </div>
-      </div>
+      <h2 class="section-head ink" data-decode>── about</h2>
+      <p class="ink"><span class="todo">[ who you are, why you wandered into town — write me ]</span></p>
     </section>
 
-    <section class="block">
-      <h2 class="section-head ink" data-decode data-clear>&#9472;&#9472; writing</h2>
-      <p class="ink" data-clear><a href="https://x.com/Sureffi/status/2078201650133741766">On context economics in agentic sessions</a></p>
-      <p class="note ink" data-clear>How to write an instruction file &mdash; in the pipe.</p>
-    </section>
-
-    <footer class="block">
-      <p class="ink" data-clear><a href="https://x.com/Sureffi">x.com/Sureffi</a> &middot;
-      <a href="https://github.com/Sureffi">github</a> &middot;
-      <a href="mailto:sureffi@proton.me">sureffi@proton.me</a></p>
-  
-    </footer>
   </main>
 
   <noscript>
@@ -309,7 +211,6 @@
      all of them shear when a scan tear crosses their rows. */
   let inks = [];
   function setInks(list) {
-    needCool = true;                 // fresh registry: recarve on the next step
     const old = new Map(inks.map(I => [I.el, I]));
     inks = list.map(o => old.get(o.el) ||
       { el: o.el, calm: o.calm !== false, wy0: 0, wy1: -1, jolt: 0 });
@@ -361,9 +262,7 @@
       coolFlat = false;
       dscr.fill(1e9);
       for (const tr of tears) {
-        const p = (now - tr.t0) / tr.dur;
-        const o = p < .12 ? 1 - Math.pow(1 - p / .12, 3)
-                          : Math.cos((p - .12) / .88 * Math.PI / 2);
+        const o = Math.sin(Math.PI * (now - tr.t0) / tr.dur);
         const x0 = Math.max(1, tr.cx - tr.r * 2 | 0), x1 = Math.min(FW - 2, tr.cx + tr.r * 2 | 0);
         const y0 = Math.max(1, tr.cy - tr.r * 2 | 0), y1 = Math.min(FH - 2, tr.cy + tr.r * 2 | 0);
         for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
@@ -396,6 +295,7 @@
       if (I.calm) carve(r, now, ph);
     }
     weather(now);                    // the weather turns at the cool cadence
+    pressApparitions(now);           // and the others take their places
   }
 
   let mode = 'idle';                 // 'idle' | 'working'
@@ -457,37 +357,10 @@
       b += fa * Math.exp(-(dx * dx + dyy * dyy));            // the furnace
       dx = (cx - ax) / 4.4; dyy = (cy - ay) / 3.6;
       b += .34 * Math.exp(-(dx * dx + dyy * dyy));           // the gaze
-      if (b > .95) b = .95 + (b - .95) * .5;       // soft knee on the highs
-      gB[cy * GW + cx] = b < .04 ? .04 : b > 1.4 ? 1.4 : b;
+      gB[cy * GW + cx] = b < .04 ? .04 : b > 1.5 ? 1.5 : b;
       h = (h - .46) * 2.2;           // only the strong cold survives; it runs red
       gH[cy * GW + cx] = h < 0 ? 0 : h > 1 ? 1 : h;
     }
-    /* auto-exposure: when the sine phases align and the whole field runs
-       hot, pull the frame back to its light budget — shapes keep their
-       contrast, the wall keeps its dark. EXPO is the knob: lower = moodier. */
-    const EXPO = .60;                // the light budget: lower = moodier
-    const DEPTH = .19;               // the spread floor: higher = starker
-    const NG = GW * GH;
-    let esum = 0;
-    for (let i = 0; i < NG; i++) esum += gB[i];
-    let emean = esum / NG;
-    if (emean > EXPO) {              // exposure: hold the mean
-      const ek = EXPO / emean;
-      for (let i = 0; i < NG; i++) gB[i] *= ek;
-      emean = EXPO;
-    }
-    let dsum = 0;                    // depth: hold the spread. a flat field
-    for (let i = 0; i < NG; i++)     // has no near and far — restretch it
-      dsum += Math.abs(gB[i] - emean);
-    const dev = dsum / NG;
-    if (dev < DEPTH) {
-      const ck = Math.min(2.4, DEPTH / (dev > .02 ? dev : .02));
-      for (let i = 0; i < NG; i++) {
-        const b = emean + (gB[i] - emean) * ck;
-        gB[i] = b < .04 ? .04 : b > 1.4 ? 1.4 : b;
-      }
-    }
-
     // pour the weather onto the pixels: bilinear is separable, so blend each
     // grid row once and the sweep needs only the x-mix; nearest hue from a LUT
     for (let y = 0; y < FH; y++) {
@@ -515,23 +388,11 @@
         offCol  = new Uint8Array(FW), topCol = new Uint8Array(FW),
         cb      = new Uint8Array(FW), colVi  = new Uint8Array(FW);
   {
-    /* the ground walk stays low — the dark is the fabric, strands are the
-       exception. bright bundles 1-4 columns wide land on it at a fixed
-       rate, so every minting has the same sparse comb; only the placement
-       differs. STRAND_P is the knob: higher = busier wall. */
-    const STRAND_P = .075;
-    let v = 64, gap = 0, strand = 0, sv = 0;
+    let v = 170, gap = 0;
     for (let x = 0; x < FW; x++) {
-      v += (rnd() - .5) * 30; v = v < 20 ? 20 : v > 105 ? 105 : v;
-      if (gap > 0) { baseCol[x] = 8 + ((rnd() * 12) | 0); gap--; }
-      else if (strand > 0) {
-        sv += (rnd() - .5) * 40; sv = sv < 130 ? 130 : sv > 255 ? 255 : sv;
-        baseCol[x] = sv; strand--;
-      } else {
-        baseCol[x] = v;
-        if (rnd() < STRAND_P) { strand = 1 + ((rnd() * 3) | 0); sv = 150 + rnd() * 105; }
-        else if (rnd() < .05) gap = 1 + ((rnd() * 3) | 0);
-      }
+      v += (rnd() - .5) * 46; v = v < 26 ? 26 : v > 255 ? 255 : v;
+      if (gap > 0) { baseCol[x] = 8 + ((rnd() * 16) | 0); gap--; }
+      else { baseCol[x] = v; if (rnd() < .045) gap = 1 + ((rnd() * 3) | 0); }
       spdCol[x] = 11 + ((rnd() * 20) | 0);     // >>4 → 0.7×–1.9× the fall
       offCol[x] = (rnd() * 256) | 0;
       topCol[x] = rnd() < .3 ? (rnd() * 9) | 0 : 0;   // a ragged upper hem
@@ -643,7 +504,7 @@
      a sea of burnt packets at the wall's foot: clumped dust that twinkles
      and creeps, a hot seam where wall meets ground, and the curtain's own
      reflection streaking a few rows down into the dark. */
-  const DOTN = 420;
+  const DOTN = 950;
   const dotX = new Float32Array(DOTN), dotY = new Uint16Array(DOTN),
         dotV = new Float32Array(DOTN), dotP = new Float32Array(DOTN),
         dotA = new Uint8Array(DOTN);
@@ -832,22 +693,13 @@
      bursts. the pulse: a slow interrogation wave sweeping down the wall. */
   const slices = [];
   const rowDx = new Int16Array(FH), rowBoost = new Uint8Array(FH);
-  const rowWild = new Uint8Array(FH);
   let burstAt = 2200, burstN = 0, pulseAt = 5200, pulseT0 = -1;
   function spawnSlice(cy, now) {
-    let y0;
-    if (cy != null)
-      y0 = Math.max(0, Math.min(FH - 3, (cy + (rnd() - .5) * 72) | 0));
-    else for (let t = 0; t < 4; t++) {           // ambient: miss the ink
-      y0 = (rnd() * (FH - 10)) | 0;
-      let hit = false;
-      for (const I of inks)
-        if (I.wy1 >= I.wy0 && y0 <= I.wy1 + 2 && y0 + 13 >= I.wy0 - 2) { hit = true; break; }
-      if (!hit) break;
-    }
+    const y0 = cy != null
+      ? Math.max(0, Math.min(FH - 3, (cy + (rnd() - .5) * 72) | 0))
+      : (rnd() * (FH - 10)) | 0;
     slices.push({
       y0, h: 3 + ((rnd() * 10) | 0),
-      wild: cy != null,              // click-born slices may savage the text
       dx: (rnd() < .5 ? -1 : 1) * (6 + ((rnd() * 36) | 0)),
       until: now + 30 + rnd() * 90,
       boost: rnd() < .45 ? 3 : 0,
@@ -907,7 +759,7 @@
       simTick++;
       if (still && (simTick & 3) !== 0) continue;
       work++;
-      if ((simTick & 3) === 0 || needCool || tears.length) { rebuildCool(now); needCool = false; }
+      if ((simTick & 3) === 0 || needCool) { rebuildCool(now); needCool = false; }
       att.x += (att.tx - att.x) * .045;            // the gaze drifts, never snaps
       att.y += (att.ty - att.y) * .045;
       if (!still) {
@@ -973,7 +825,7 @@
     }
     const tB = performance.now();
 
-    rowDx.fill(0); rowBoost.fill(0); rowWild.fill(0);
+    rowDx.fill(0); rowBoost.fill(0);
     if (pulseT0 >= 0) {
       const pp = (now - pulseT0) / 2400;
       if (pp >= 1) pulseT0 = -1;
@@ -991,7 +843,6 @@
       const y1 = Math.min(FH - 1, sl.y0 + sl.h);
       for (let y = sl.y0; y <= y1; y++) {
         rowDx[y] = sl.dx;
-        if (sl.wild) rowWild[y] = 1;
         if (sl.boost > rowBoost[y]) rowBoost[y] = sl.boost;
       }
     }
@@ -1002,7 +853,7 @@
       if (I.wy1 < I.wy0) continue;
       let dj = 0;
       for (let y = I.wy0; y <= I.wy1; y++)
-        if (rowWild[y] && Math.abs(rowDx[y]) > Math.abs(dj)) dj = rowDx[y];
+        if (Math.abs(rowDx[y]) > Math.abs(dj)) dj = rowDx[y];
       const j = dj ? Math.max(-14, Math.min(14, dj * 1.2)) | 0 : 0;
       if (j !== I.jolt) {
         if (j && !I.jolt && window.deck && deck.tearstruck) deck.tearstruck(I.el);
@@ -1011,7 +862,6 @@
     }
 
     dressColumns(); dustFrame(now, pend); watcherFrame(pend); pend = 0;
-    pressApparitions(now);           // the others move on the paint clock now
 
     /* the blit: curtain × weather, the others pressing through, the heat
        layer burning over everything. torn rows wrap around; boosts skip
@@ -1031,7 +881,7 @@
             const ab = appB[si];
             if (ab) ap = (ab * (96 + (vm >> 1))) >> 8;   // their own light,
           }                                              // striped by the weave
-          const cm = calm[row + x];
+          const cm = calm[si];
           if (cm) {                                  // ink clears its ground —
             c8 = (c8 * (270 - cm)) >> 8;             // but the others only
             if (ap) ap = (ap * (270 - (cm >> 1))) >> 8;   // half-respect it
@@ -1070,7 +920,7 @@
           if (c8 > 255) c8 = 255;
           if (dy < 6 && wDim[sx] < 255 && dy >= wTop[sx])
             c8 = (c8 * wDim[sx]) >> 8;               // a watcher, against the light
-          const cm = calm[row + x];
+          const cm = calm[si];
           if (cm) c8 = (c8 * (270 - cm)) >> 8;
           const vg = VIG[row + x];                   // the glass, baked in
           c8 = (c8 * vg) >> 8;
@@ -1230,7 +1080,7 @@
 
     function collectInks() {
       const els = [];
-      document.querySelectorAll('#page [data-clear]').forEach(el => els.push({ el }));
+      document.querySelectorAll('#page .ink').forEach(el => els.push({ el }));
       return els;
     }
     function syncInk() { if (window.deck && deck.wall) deck.wall.ink(collectInks()); }
@@ -1271,64 +1121,16 @@
       document.addEventListener('DOMContentLoaded', boot);
     else boot();
     addEventListener('resize', syncInk);
-    let scrollPend = false;          // clearings follow the scroll, one per frame
-    addEventListener('scroll', () => {
-      if (scrollPend) return;
-      scrollPend = true;
-      requestAnimationFrame(() => { scrollPend = false; syncInk(); });
-    }, { passive: true });
 
     /* hands: the cursor touches the wall (sparks), a click tears a wound */
-    let lastTouch = 0, lx = -1, ly = -1;
+    let lastTouch = 0;
     document.addEventListener('pointermove', e => {
       if (still || !window.deck || !deck.wall) return;
       const now = performance.now();
-      if (now - lastTouch < 12) return;
+      if (now - lastTouch < 16) return;             // the trail keeps up with the hand
       lastTouch = now;
-      const x = e.clientX, y = e.clientY;
-      if (lx >= 0) {                 // a stroke, not a stamp: fill the gap
-        const dx = x - lx, dy = y - ly, d = Math.hypot(dx, dy);
-        const step = Math.max(6, innerWidth / 480 * 2.2);   // ~one wall px apart
-        const n = Math.min(22, (d / step) | 0);
-        for (let i = 1; i < n; i++)
-          deck.wall.touch(lx + dx * i / n, ly + dy * i / n, 8);
-      }
-      deck.wall.touch(x, y, 10);
-      lx = x; ly = y;
+      deck.wall.touch(e.clientX, e.clientY, 10);
     });
-    document.addEventListener('pointerleave', () => { lx = -1; ly = -1; });
-
-    /* the tear corrupts the words it crosses: glyphs boil into static and
-       resolve back. wired only to wild (click-born) slices via the jolt. */
-    const CORR = '\u2591\u2592\u2593\u2588\u259a\u259e\u2599\u259f\u256c\u256a\u256b\u2261\u00a7\u00d8\u00a4\u00d7#%&@';
-    const struckSet = new WeakSet();
-    deck.tearstruck = el => {
-      if (still || struckSet.has(el)) return;
-      struckSet.add(el);
-      const nodes = [];
-      (function walk(n) {
-        for (const c of n.childNodes)
-          c.nodeType === 3 ? nodes.push([c, c.data]) : walk(c);
-      })(el);
-      const t0 = performance.now(), dur = 340;
-      (function step() {
-        const p = (performance.now() - t0) / dur;
-        if (p >= 1 || !el.isConnected) {
-          for (const [n, d] of nodes) n.data = d;
-          struckSet.delete(el);
-          return;
-        }
-        const amt = .22 * (1 - p);               // the static decays
-        for (const [n, d] of nodes) {
-          let s = '';
-          for (let i = 0; i < d.length; i++)
-            s += d[i] !== ' ' && Math.random() < amt
-               ? CORR[(Math.random() * CORR.length) | 0] : d[i];
-          n.data = s;
-        }
-        requestAnimationFrame(step);
-      })();
-    };
     document.addEventListener('pointerdown', e => {
       if (!window.deck || !deck.wall) return;
       if (window.getSelection && String(getSelection())) return;   // not mid-select

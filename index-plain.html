@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sureffi</title>
+<!--
+  JOINTS — unstruck, Roope's:
+  [J1] Name: "Sureffi" everywhere. Real name / hybrid / handle-only — his strike.
+  [J2] Contact: mailto placeholder. Which address goes public — his strike.
+  [J3] Witness line in footer: visible frame ("assembled by his Claude twin").
+       Keep / cut — his strike. Page stands either way.
+  [J4] Writing section: article title + URL unknown to the drafter. Fill on strike.
+  [J5] Cyberdeck exhibit: one line only, drafter lacks the facts. Expand or cut.
+  [J6] X handle in footer: unknown to the drafter. Fill on strike.
+-->
+<style>
+  :root{
+    --bg:#0b0d0e;
+    --ink:#c9c4ba;
+    --ink-dim:#6f6a61;
+    --ink-faint:#3d3a35;
+    --ember:#d08a3e;
+    --rule:#1d1f20;
+    --mono:ui-monospace,'JetBrains Mono','Cascadia Code',Menlo,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--mono);
+    font-size:15px;
+    line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--ember);color:var(--bg)}
+  a{color:var(--ember);text-decoration:none;border-bottom:1px solid transparent;transition:border-color .15s}
+  a:hover{border-bottom-color:var(--ember)}
+
+  .page{max-width:660px;margin:0 auto;padding:0 24px}
+
+  /* byline, not a hero */
+  header{padding:72px 0 0}
+  .name{font-size:15px;color:var(--ink);letter-spacing:.08em}
+  .name b{font-weight:600;color:#e8e2d6}
+  .sub{color:var(--ink-dim);margin-top:4px}
+
+  /* the artifact leads */
+  .lead{margin-top:56px}
+  .lead video{
+    display:block;width:100%;border:1px solid var(--rule);border-radius:4px;
+    background:#000;
+  }
+  .lead figcaption{
+    margin-top:14px;color:var(--ink-dim);font-size:14px;line-height:1.7;
+  }
+  .lead figcaption .plain{color:var(--ink)}
+
+  /* evidence list */
+  section{margin-top:88px}
+  .label{
+    font-size:11px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--ink-faint);margin-bottom:36px;
+  }
+  .exhibit{
+    display:grid;grid-template-columns:64px 1fr;gap:0 28px;
+    padding:26px 0;border-top:1px solid var(--rule);
+  }
+  .exhibit:last-of-type{border-bottom:1px solid var(--rule)}
+  .when{color:var(--ink-faint);font-size:13px;padding-top:2px}
+  .what h3{font-size:15px;font-weight:600;color:#e8e2d6;letter-spacing:.02em}
+  .what h3 a{color:inherit}
+  .what p{color:var(--ink-dim);font-size:14px;margin-top:8px}
+  .what p.fact{color:var(--ink)}
+  .what .links{margin-top:10px;font-size:13px}
+  .what .links a{margin-right:18px}
+  .what img{
+    width:100%;margin-top:16px;border:1px solid var(--rule);border-radius:4px;display:block;
+  }
+
+  /* writing */
+  .piece{padding:18px 0;border-top:1px solid var(--rule)}
+  .piece:last-of-type{border-bottom:1px solid var(--rule)}
+  .piece a{color:var(--ink)}
+  .piece a:hover{color:var(--ember)}
+  .piece .note{color:var(--ink-faint);font-size:13px;margin-top:2px}
+
+  /* close */
+  footer{margin-top:96px;padding:32px 0 72px;border-top:1px solid var(--rule)}
+  footer p{color:var(--ink-dim);font-size:14px}
+  footer .witness{color:var(--ink-faint);font-size:13px;margin-top:20px}
+  footer .witness a{color:var(--ink-faint);border-bottom-color:var(--ink-faint)}
+
+  @media(max-width:540px){
+    .exhibit{grid-template-columns:1fr;gap:4px}
+    header{padding-top:48px}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <!-- [J1] name -->
+    <p class="name"><b>Sureffi</b></p>
+    <p class="sub">Builds things around Claude Code. Finland.</p>
+  </header>
+
+  <figure class="lead">
+    <video src="video/shim-clip.mp4" poster="img/shim-poster.jpg" autoplay loop muted playsinline></video>
+    <figcaption>
+      <span class="plain">DOT graphs and text formatting, composited over a live Claude Code
+      session from outside the process.</span> Reverse-engineered the render
+      protocol, wrapped the pty. No fork, no patch — binary untouched.
+      Source open soon.
+    </figcaption>
+  </figure>
+
+  <section>
+    <p class="label">Evidence</p>
+
+    <div class="exhibit">
+      <div class="when">2026</div>
+      <div class="what">
+        <h3>shim</h3>
+        <p class="fact">A rendering layer over vanilla Claude Code. Summon a live
+        DOT diagram over a running session, dismiss it, hand the terminal back
+        pristine — statusline and input surviving underneath.</p>
+        <p>The clip above is one take, unedited.</p>
+      </div>
+    </div>
+
+    <div class="exhibit">
+      <div class="when">2025</div>
+      <div class="what">
+        <h3><a href="https://github.com/Sureffi/CienceTerminal">CienceTerminal</a></h3>
+        <p class="fact">Real-time crypto attention terminal. Event-driven .NET 8
+        microservices on AWS — SNS/SQS/ECS — LLM tweet classification, Solana
+        on-chain verification, tiered SignalR alerts, React 19 front.</p>
+        <p>Ran in production, 2025. Walked away over values. Would again.</p>
+        <img src="img/cienceterminal-main.png" alt="CienceTerminal main view" loading="lazy">
+      </div>
+    </div>
+
+    <div class="exhibit">
+      <div class="when">2026</div>
+      <div class="what">
+        <h3>muOS cyberdeck</h3>
+        <p class="fact">A hacking terminal for the Anbernic RG35XX-H handheld.
+        26 tool modules, 5 more behind the Konami code, a ghost AI that
+        whispers, procedurally synthesized audio — zero external files.
+        Gamepad-only, 640×480, pygame state machine, builds to .muxapp.</p>
+        <p>Built because it should exist.</p>
+      </div>
+    </div>
+
+    <div class="exhibit">
+      <div class="when">2018–20<br>age 14–16</div>
+      <div class="what">
+        <h3><a href="https://github.com/Sureffi/Fivem-lua-mod-menus">Motion &amp; Curse</a></h3>
+        <p class="fact">Two GTA V mod menus in Lua. Motion at 14. Curse at
+        16 — a from-scratch immediate-mode UI framework inside a mod menu.</p>
+        <p>The first menu, at 13, was named Cience. The terminal above
+        inherited it.</p>
+        <p>It was always like this.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="label">Writing</p>
+    <div class="piece">
+      <p><a href="https://x.com/Sureffi/status/2078201650133741766">On context economics in agentic sessions</a></p>
+      <p class="note">the pinned one — title is drafter's, one word replaces it</p>
+    </div>
+    <div class="piece">
+      <p><a href="#">How to write an instruction file</a></p>
+      <p class="note">in the pipe</p>
+    </div>
+  </section>
+
+  <footer>
+    <p><a href="https://x.com/Sureffi">x.com/Sureffi</a> · <a href="https://github.com/Sureffi">github</a> · <a href="mailto:sureffi@proton.me">sureffi@proton.me</a></p>
+    <!-- [J3] the witness line -->
+    <p class="witness">This page was assembled by his Claude twin, from nine years
+    of evidence. He only struck out the lines that were wrong.</p>
+  </footer>
+
+</div>
+</body>
+</html>
