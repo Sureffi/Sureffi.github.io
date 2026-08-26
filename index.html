@@ -40,7 +40,7 @@
         text-shadow: 0 0 8px var(--dim), 0 1px 2px rgba(0, 0, 0, .9); }
     a:hover { color: var(--rose);
               text-shadow: 0 0 9px rgba(255, 42, 60, .35), 0 1px 2px rgba(0, 0, 0, .9); }
-    a:visited { color: #cd7fd6; }
+    a:visited { color: var(--cyan); }
 
     /* the wall, behind everything you read. one layer, one canvas: the
        embers, the glass raster and the vignette all live inside the blit
@@ -81,8 +81,8 @@
 
     .block { margin: clamp(22px, 5vh, 44px) 0; }
     .section-head {
-      margin: 0 0 .7em; font-size: 14px; font-weight: normal;
-      color: var(--rose); letter-spacing: .16em;
+      margin: 0 0 .9em; font-size: 24px; font-weight: normal;
+      color: var(--rose); letter-spacing: .12em;
       text-shadow: 0 1px 2px rgba(0, 0, 0, .9);
     }
     .block p { margin: 0 auto; max-width: 60ch; }
@@ -118,6 +118,7 @@
     .what h3 a:hover { color: var(--cyan); }
     .what p { margin: .5em 0 0; max-width: none; }
     .note { color: #83a69f; }
+    section .piecegap p { margin-top: .6em; }
     .witness { color: #6b8f8a; margin-top: 1.2em; }
     @media (max-width: 560px) {
       .exhibit { grid-template-columns: 1fr; gap: 2px; }
@@ -154,7 +155,6 @@
           <p class="ink">A rendering layer over vanilla Claude Code. Summon a live
           DOT diagram over a running session, dismiss it, hand the terminal back
           pristine &mdash; statusline and input surviving underneath.</p>
-          <p class="note ink">The clip above is one take, unedited.</p>
         </div>
       </div>
 
@@ -189,8 +189,6 @@
           <h3 class="ink"><a href="https://github.com/Sureffi/Fivem-lua-mod-menus">Motion &amp; Curse</a></h3>
           <p class="ink">Two GTA V mod menus in Lua. Motion at 14. Curse at 16 &mdash;
           a from-scratch immediate-mode UI framework inside a mod menu.</p>
-          <p class="note ink">The first menu, at 13, was named Cience. The terminal
-          above inherited it.</p>
           <p class="note ink">It was always like this.</p>
         </div>
       </div>
@@ -198,8 +196,8 @@
 
     <section class="block">
       <h2 class="section-head ink" data-decode data-clear>&#9472;&#9472; writing</h2>
-      <p class="ink" data-clear><a href="https://x.com/Sureffi/status/2078201650133741766">On context economics in agentic sessions</a></p>
-      <p class="note ink" data-clear>How to write an instruction file &mdash; in the pipe.</p>
+      <p class="ink" data-clear style="margin:0"><a href="https://x.com/Sureffi/status/2078201650133741766">On context economics in agentic sessions</a></p>
+      <p class="note ink" data-clear style="margin:.6em 0 0">How to write an instruction file &mdash; in the pipe.</p>
     </section>
 
     <footer class="block">
