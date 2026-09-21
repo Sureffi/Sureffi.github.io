@@ -4,6 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>~Sureffi</title>
+  <script>
+    // the breach plays once per visit; decided before first paint so the name never flashes early
+    document.documentElement.classList.add('walled');
+    try {
+      if (!sessionStorage.getItem('booted') &&
+          !matchMedia('(prefers-reduced-motion: reduce)').matches)
+        document.documentElement.classList.add('boot');
+    } catch (e) {}
+  </script>
 
   <style>
     /* Web IBM VGA 8x16 (c) VileR / int10h.org, CC BY-SA 4.0 - vendored in fonts/ */
@@ -13,113 +22,106 @@
       font-display: swap;
     }
 
+    /* the rice's palette, names kept */
     :root {
-      --ink:  #c3dad4;                 /* resolved text — desaturated, reads calm */
-      --cyan: #2af5e6;                 /* links */
-      --dim:  rgba(42, 245, 230, .26);
-      --mag:  #ff3df0;                 /* sigils, selection */
-      --red:  #ff2a3c;                 /* heat */
-      --rose: #ffe9e4;                 /* white-hot — the wall's voice, headings */
-      --gut:  clamp(18px, 4vw, 64px);
+      --bg:      #04070b;              /* blue-black field */
+      --fg:      #d9eef0;              /* cold paper-white */
+      --dim:     #9cbcc2;              /* readable secondary ink */
+      --muted:   #6e9299;              /* recessed tertiary ink */
+      --accent:  #6fe3d6;              /* teal: live signal */
+      --accent2: #9aa6ff;              /* periwinkle: identity */
+      --rain:    #2aa9a8;              /* the streaks */
+      --glow:    rgba(111, 227, 214, .26);
+      --edge:    rgba(42, 169, 168, .28);
+      --hair:    rgba(165, 227, 221, .12);
+      --ground:  0 1px 2px rgba(0, 0, 0, .9);
+      --gut:     clamp(18px, 4vw, 64px);
     }
     * { box-sizing: border-box; }
-    html { background: #000; }
+    html { background: var(--bg); overflow-x: clip; }
+    html.walled { background: #000; }   /* past the wall's foot the floor goes on, black */
     html, body { min-height: 100%; }
     body {
-      margin: 0;
-      background: transparent;         /* there is no page. there is only the wall */
-      color: var(--ink);
+      margin: 0; position: relative;
+      color: var(--fg);
       font-family: "Px437 IBM VGA 8x16", "PxPlus IBM VGA8", "IBM VGA 8x16",
                    ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
       font-size: 15px; line-height: 1.55;
       cursor: crosshair;
     }
-    ::selection { background: var(--mag); color: #000; }
+    ::selection { background: var(--accent2); color: #000; }
 
-    a { color: var(--cyan); text-decoration: none;
-        text-shadow: 0 0 8px var(--dim), 0 1px 2px rgba(0, 0, 0, .9); }
-    a:hover { color: var(--rose);
-              text-shadow: 0 0 9px rgba(255, 42, 60, .35), 0 1px 2px rgba(0, 0, 0, .9); }
-    a:visited { color: var(--cyan); }
+    a, a:visited { color: var(--accent); text-decoration: none;
+                   text-shadow: 0 0 8px var(--glow), var(--ground); }
+    a:hover { color: var(--fg); text-shadow: 0 0 9px rgba(111, 227, 214, .35), var(--ground); }
 
-    /* the wall, behind everything you read. one layer, one canvas: the
-       embers, the glass raster and the vignette all live inside the blit
-       now — old iron pays per compositor layer, so there is only one */
+    /* the wall stands at the head of the page, one screen of it, and the
+       floor runs on under all the rest. scroll and the view pans down: the
+       floor comes up with the page, the wall, further off, lags and sinks
+       behind the floor's edge */
     #wall {
-      position: fixed; inset: 0;
-      width: 100vw; height: 100vh;
+      position: absolute; top: 0; left: 0;
+      width: 100vw; height: 100%;
       pointer-events: none;
       z-index: -2; image-rendering: pixelated;
     }
 
-    /* the page rides on the wall */
+    /* the page: the masthead on the wall, the rest on the floor */
     #page {
       position: relative; z-index: 2;
-      width: fit-content;                         /* shrink to the words, no wider */
-      max-width: min(680px, calc(100vw - 2 * var(--gut)));
-      margin: clamp(40px, 9vh, 120px) auto clamp(120px, 22vh, 220px);
-      padding: 0 var(--gut);
-      text-align: center;                         /* the wall's words gather to the middle */
+      width: 100%; max-width: min(720px, calc(100vw - 2 * var(--gut)));
+      margin: 0 auto;
+      padding: 0 var(--gut) clamp(120px, 22vh, 220px);
     }
 
-    /* each line sits in a shadow the wall casts around it (a clearing), and
-       carries its own grounding so the glyphs survive the brighter curtain */
-    .ink { text-shadow: 0 1px 2px rgba(0, 0, 0, .95), 0 0 9px rgba(0, 0, 0, .65); }
+    /* transmission anatomy: resolved ink ← burn point ← static */
+    .hot { color: var(--rain); text-shadow: 0 0 7px rgba(42, 169, 168, .55); }
+    .raw { color: rgba(42, 169, 168, .30); text-shadow: none; }
 
-    /* transmission anatomy: resolved ink ← white-hot burn point ← blood static */
-    .hot { color: var(--red); text-shadow: 0 0 7px rgba(255, 42, 60, .55); }
-    .raw { color: rgba(255, 42, 60, .30); text-shadow: none; }
-
-    .masthead { margin-bottom: clamp(28px, 6vh, 56px); }
+    /* the masthead is a whole screen, centered on the curtain, not the
+       window: the dust takes the bottom sixth */
+    .masthead {
+      position: relative; min-height: 100svh; padding-bottom: 14svh;
+      display: flex; flex-direction: column; justify-content: center;
+      text-align: center;
+      width: 100vw; margin-left: calc(50% - 50vw);   /* the name outgrows the column */
+      user-select: none; pointer-events: none;       /* it's the wall's: clicks go through */
+    }
     #title {
-      margin: 0; font-size: clamp(28px, 7vw, 52px); line-height: 1.1;
-      color: #ffe9e4; letter-spacing: .04em;      /* white-hot */
-      text-shadow: 0 0 13px rgba(255, 42, 60, .50), 0 1px 2px rgba(0, 0, 0, .9);
+      margin: 0; line-height: 1.1; letter-spacing: .04em;
+      font-size: clamp(48px, 13vw, 400px);
+      text-shadow: 0 0 .25em rgba(111, 227, 214, .50), var(--ground);
     }
-    .tagline { margin: .5em 0 0; color: var(--cyan);
-               text-shadow: 0 0 8px var(--dim), 0 1px 2px rgba(0, 0, 0, .9); }
+    .tagline { margin: .6em 0 0; color: var(--accent); font-size: clamp(18px, 2vw, 32px);
+               text-shadow: 0 0 8px var(--glow), var(--ground); transition: opacity .35s; }
+    .boot #title, .boot .tagline { visibility: hidden; }
+    .walled #title { color: transparent; text-shadow: none; }
+    .eaten { opacity: 0; }
 
     .block { margin: clamp(22px, 5vh, 44px) 0; }
+    .block p { margin: 0; }
     .section-head {
       margin: 0 0 .9em; font-size: 24px; font-weight: normal;
-      color: var(--rose); letter-spacing: .12em;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, .9);
+      letter-spacing: .12em; text-shadow: var(--ground);
     }
-    .block p { margin: 0 auto; max-width: 60ch; }
-    .todo { color: #7c5860; }          /* fill-me-in markers */
+    .note { color: var(--dim); }
 
-    .links { list-style: none; margin: 0; padding: 0; }
-    .links li { padding: 2px 0; white-space: nowrap;
-                overflow: hidden; text-overflow: ellipsis; }
-    .links li .note { color: #6b8f8a; }
+    .exhibit { display: grid; grid-template-columns: 84px 1fr; gap: 0 22px;
+               padding: 20px 0; border-top: 1px solid var(--hair); }
+    .exhibit:last-of-type { border-bottom: 1px solid var(--hair); }
+    .when { color: var(--muted); font-size: 13px; padding-top: 3px; }
+    .what h3 { margin: 0 0 2px; font-size: 24px; font-weight: normal; letter-spacing: .06em; }
+    .what h3 a, .what h3 a:visited { color: var(--fg); }
+    .what h3 a:hover { color: var(--accent); }
+    .what p { margin: .5em 0 0; }
+    .what code { font: inherit; color: var(--accent); }
+    .what img, .what video { display: block; width: 100%; margin-top: 12px;
+                             border: 1px solid var(--edge); background: var(--bg); }
 
     @media (max-width: 720px) {
       body { font-size: 14px; }
       :root { --gut: 16px; }
     }
-
-    /* ── evidence furniture: the witnessed draft, re-inked for the wall ── */
-    #page { text-align: left; width: 100%;
-            max-width: min(720px, calc(100vw - 2 * var(--gut))); }
-    .masthead { text-align: center; }
-    .plainline { color: #83a69f; margin: .4em 0 0; text-align: center; }
-    .lead { margin: 0 0 clamp(28px, 6vh, 52px); }
-    .lead video, .exhibit img { display: block; width: 100%;
-      border: 1px solid rgba(255, 42, 60, .28); background: #000; }
-    .exhibit img { margin-top: 12px; }
-    .lead figcaption { margin-top: 12px; }
-    .exhibit { display: grid; grid-template-columns: 84px 1fr; gap: 0 22px;
-      padding: 20px 0; border-top: 1px solid rgba(165, 227, 221, .12); }
-    .exhibit:last-of-type { border-bottom: 1px solid rgba(165, 227, 221, .12); }
-    .when { color: #977079; font-size: 13px; padding-top: 3px; }
-    .what h3 { margin: 0 0 2px; font-size: 24px; font-weight: normal;
-      color: var(--rose); letter-spacing: .06em; }
-    .what h3 a, .what h3 a:visited { color: var(--rose); }
-    .what h3 a:hover { color: var(--cyan); }
-    .what p { margin: .5em 0 0; max-width: none; }
-    .note { color: #83a69f; }
-    section .piecegap p { margin-top: .6em; }
-    .witness { color: #6b8f8a; margin-top: 1.2em; }
     @media (max-width: 560px) {
       .exhibit { grid-template-columns: 1fr; gap: 2px; }
     }
@@ -132,115 +134,94 @@
 
   <main id="page">
     <header class="masthead">
-      <h1 id="title" class="ink" data-decode data-clear>~Sureffi</h1>
-      <p class="tagline ink" data-decode data-clear>the entities are nice beyond the wall</p>
-      <p class="plainline ink" data-clear>builds things around Claude Code &middot; Finland</p>
+      <h1 id="title" data-decode data-clear>~Sureffi</h1>
+      <p class="tagline" data-decode data-clear>the entities are nice beyond the wall</p>
     </header>
 
-    <figure class="lead">
-      <video src="video/shim-clip.mp4" poster="img/shim-poster.jpg" autoplay loop muted playsinline></video>
-      <figcaption class="ink" data-clear>DOT graphs and text formatting, composited over a live
-      Claude Code session from outside the process. Reverse-engineered the render
-      protocol, wrapped the pty. No fork, no patch &mdash; binary untouched.
-      Source open soon.</figcaption>
-    </figure>
-
     <section class="block">
-      <h2 class="section-head ink" data-decode data-clear>&#9472;&#9472; evidence</h2>
+      <h2 class="section-head" data-decode>&#9472;&#9472; evidence</h2>
 
       <div class="exhibit">
-        <div class="when ink" data-clear>2026</div>
-        <div class="what" data-clear>
-          <h3 class="ink">shim</h3>
-          <p class="ink">A rendering layer over vanilla Claude Code. Summon a live
-          DOT diagram over a running session, dismiss it, hand the terminal back
-          pristine &mdash; statusline and input surviving underneath.</p>
+        <div class="when">2026</div>
+        <div class="what">
+          <h3><a href="https://github.com/Sureffi/drawer">drawer</a></h3>
+          <p>A <code>```dot</code> fence in Claude Code becomes a drawing, in place,
+          as the reply streams. One binary, nothing else running.</p>
+          <video src="video/shim-clip.mp4" poster="img/shim-poster.jpg" autoplay loop muted playsinline></video>
         </div>
       </div>
 
       <div class="exhibit">
-        <div class="when ink" data-clear>2025</div>
-        <div class="what" data-clear>
-          <h3 class="ink"><a href="https://github.com/Sureffi/CienceTerminal">CienceTerminal</a></h3>
-          <p class="ink">Real-time crypto attention terminal. Event-driven .NET 8
+        <div class="when">2025</div>
+        <div class="what">
+          <h3><a href="https://github.com/Sureffi/CienceTerminal">CienceTerminal</a></h3>
+          <p>Real-time crypto attention terminal. Event-driven .NET 8
           microservices on AWS &mdash; SNS/SQS/ECS &mdash; LLM tweet classification,
           Solana on-chain verification, tiered SignalR alerts, React 19 front.</p>
-          <p class="note ink">Ran in production, 2025. Walked away over values.
+          <p class="note">Ran in production, 2025. Walked away over values.
           <span class="hot">Would again.</span></p>
           <img src="img/cienceterminal-main.png" alt="CienceTerminal main view" loading="lazy">
         </div>
       </div>
 
       <div class="exhibit">
-        <div class="when ink" data-clear>2026</div>
-        <div class="what" data-clear>
-          <h3 class="ink">muOS cyberdeck</h3>
-          <p class="ink">A hacking terminal for the Anbernic RG35XX-H handheld.
+        <div class="when">2026</div>
+        <div class="what">
+          <h3>muOS cyberdeck</h3>
+          <p>A hacking terminal for the Anbernic RG35XX-H handheld.
           26 tool modules, 5 more behind the Konami code, a ghost AI that
           whispers, procedurally synthesized audio &mdash; zero external files.
           Gamepad-only, 640&times;480, pygame state machine, builds to .muxapp.</p>
-          <p class="note ink">Built because it should exist.</p>
+          <p class="note">Built because it should exist.</p>
         </div>
       </div>
 
       <div class="exhibit">
-        <div class="when ink" data-clear>2018&ndash;20<br>age 14&ndash;16</div>
-        <div class="what" data-clear>
-          <h3 class="ink"><a href="https://github.com/Sureffi/Fivem-lua-mod-menus">Motion &amp; Curse</a></h3>
-          <p class="ink">Two GTA V mod menus in Lua. Motion at 14. Curse at 16 &mdash;
+        <div class="when">2018&ndash;20<br>age 14&ndash;16</div>
+        <div class="what">
+          <h3><a href="https://github.com/Sureffi/Fivem-lua-mod-menus">Motion &amp; Curse</a></h3>
+          <p>Two GTA V mod menus in Lua. Motion at 14. Curse at 16 &mdash;
           a from-scratch immediate-mode UI framework inside a mod menu.</p>
-          <p class="note ink">It was always like this.</p>
+          <p class="note">It was always like this.</p>
         </div>
       </div>
     </section>
 
     <section class="block">
-      <h2 class="section-head ink" data-decode data-clear>&#9472;&#9472; writing</h2>
-      <p class="ink" data-clear style="margin:0"><a href="https://x.com/Sureffi/status/2078201650133741766">On context economics in agentic sessions</a></p>
-      <p class="note ink" data-clear style="margin:.6em 0 0">How to write an instruction file &mdash; in the pipe.</p>
+      <h2 class="section-head" data-decode>&#9472;&#9472; writing</h2>
+      <p><a href="https://x.com/Sureffi/status/2078201650133741766">On context economics in agentic sessions</a></p>
+      <p class="note" style="margin-top:.6em">How to write an instruction file &mdash; in the pipe.</p>
     </section>
 
     <footer class="block">
-      <p class="ink" data-clear><a href="https://x.com/Sureffi">x.com/Sureffi</a> &middot;
+      <p><a href="https://x.com/Sureffi">x.com/Sureffi</a> &middot;
       <a href="https://github.com/Sureffi">github</a> &middot;
       <a href="mailto:sureffi@proton.me">sureffi@proton.me</a></p>
-  
     </footer>
   </main>
 
   <noscript>
-    <marquee scrollamount="4" style="color:#ff2a3c">
+    <marquee scrollamount="4" style="color:#2aa9a8">
       ░▒▓ the wall is still here without the iron — javascript is off,
       so the curtain holds its breath tonight. ▓▒░
     </marquee>
   </noscript>
 
   <script>
-  // the glass tube is unbolted on this wall — its raster and vignette are
-  // baked into the blit itself (one compositor layer, kind to old iron).
-  // the engine's s2w() still asks about the barrel; tell it the glass is off.
-  const GLASS_ON = false, GLASS_K = 0.035;
-
-  // how often the brush touches the canvas. the sim always walks at 60 —
-  // this only meters the paint. 60, 30, or 15; the fans get a vote.
-  const PAINT_HZ = 30;
-
 (function () {
   /* ── the blackwall ────────────────────────────────────────────────────────
-     not rain on a wall anymore: the wall IS the data. a standing curtain of
-     red strands hanging from the dark, weather drifting behind it (crimson,
-     magenta, the rare cold violet), a furnace patch that wanders and burns,
-     and the things on the far side pressing close enough to glow. it stands
-     on a floor of burnt dust where small dark watchers have gathered. the
-     old wounds still work: clicks tear, tears bleed, slices shear sideways,
-     and the ink clears its own ground so you can read against the light. */
+     the wall IS the data. a standing curtain of teal strands hanging from
+     the dark, weather drifting behind it (rain, the deep indigo), a furnace
+     patch that wanders and burns, and the things on the far side pressing
+     close enough to glow. it stands on a floor of dust where small dark
+     watchers have gathered. clicks tear, slices shear sideways. */
   const FW = 480, FH = 270, MAX = 36;
   const HOR = 226;                   // the seam where the wall meets the dust
+  let CH = FH;                       // the canvas: the wall's screen, then the floor as far as the page goes
   const N = FW * FH;
   const cv = document.getElementById('wall');
-  const ctx = cv.getContext('2d', { alpha: false, desynchronized: true });
-  const img = ctx.createImageData(FW, FH);
-  const px32 = new Uint32Array(img.data.buffer);
+  const ctx = cv.getContext('webgl2', { alpha: false, antialias: false, depth: false, stencil: false,
+                                        premultipliedAlpha: false, desynchronized: true });
   let cur = new Uint8Array(N);
   let nxt = new Uint8Array(N);
   let cur32 = new Uint32Array(cur.buffer);  // 4-px windows over the same bytes:
@@ -251,13 +232,13 @@
   let rs = (Math.random() * 0xffffffff) | 0 || 0x2af5e6;
   function rnd() { rs ^= rs << 13; rs ^= rs >>> 17; rs ^= rs << 5; return (rs >>> 0) / 4294967296; }
 
-  /* two bloods, eight mixtures: the hot ramp (black → crimson → pink-white)
-     and the cold one (black → indigo → violet-white). every pixel picks its
-     mixture from the weather; the heat layer always burns pure hot. */
-  const HOTS  = [[0,[0,0,0]],[.22,[22,0,6]],[.45,[118,6,16]],[.65,[212,18,24]],
-                 [.80,[255,52,44]],[.92,[255,110,154]],[1,[255,240,244]]];
-  const COOLS = [[0,[0,0,0]],[.22,[6,6,28]],[.45,[34,24,110]],[.65,[88,48,196]],
-                 [.80,[150,96,244]],[.92,[212,164,255]],[1,[246,240,255]]];
+  /* two waters, eight mixtures: the rain ramp (black → teal → white-teal)
+     and the deep one (black → indigo → periwinkle-white). every pixel picks
+     its mixture from the weather; the heat layer always burns pure rain. */
+  const HOTS  = [[0,[0,0,0]],[.22,[4,18,20]],[.45,[16,72,72]],[.65,[42,169,168]],
+                 [.80,[111,227,214]],[.92,[180,242,232]],[1,[220,248,244]]];
+  const COOLS = [[0,[0,0,0]],[.22,[8,8,28]],[.45,[32,38,110]],[.65,[74,85,200]],
+                 [.80,[154,166,255]],[.92,[200,210,255]],[1,[235,240,255]]];
   function rampAt(stops, t) {
     let a = stops[0], b = stops[stops.length - 1];
     for (let s = 0; s < stops.length - 1; s++)
@@ -267,8 +248,8 @@
             a[1][1] + (b[1][1] - a[1][1]) * f,
             a[1][2] + (b[1][2] - a[1][2]) * f];
   }
-  /* two banks: clean rows and raster rows — the glass tube's scanlines are
-     baked into the palette, so the striping costs nothing per pixel */
+  /* two banks: clean rows and raster rows — the scanlines are baked into
+     the palette, so the striping costs nothing per pixel */
   const SCAN = .14, PB = 8 * (MAX + 1);
   const PAL = new Uint32Array(2 * PB);          // PAL[bank + hue*37 + level]
   for (let h = 0; h < 8; h++) {
@@ -287,8 +268,7 @@
   const CL = new Uint8Array(256);
   for (let k = 0; k < 256; k++) CL[k] = Math.round(Math.pow(k / 255, 1.32) * 32);
 
-  // the vignette, baked: the old overlay cost a compositor layer; its
-  // darkening lives here now, one multiply per pixel (256 = untouched)
+  // the vignette, baked: one multiply per pixel (256 = untouched)
   const VIG = new Uint16Array(N);
   for (let y = 0; y < FH; y++) for (let x = 0; x < FW; x++) {
     const ux = x / FW - .5, uy = y / FH - .5;
@@ -296,120 +276,58 @@
     VIG[y * FW + x] = 256 * (1 - .45 * t);
   }
 
-  function s2w(px, py) {             // screen → wall, through the (future) barrel
-    const k = GLASS_ON ? GLASS_K : 0;
-    const ux = px / innerWidth - .5, uy = py / innerHeight - .5;
-    const m = 1 + k * (ux * ux + uy * uy) * 4;
-    return [(.5 + ux * m) * FW, (.5 + uy * m) * FH];
+  /* depth on the pan: the floor and the page move together; the wall is
+     further off and slides at .6 their pace, what's behind it at .45 */
+  const KW = .6, KB = .45;
+  let rowPx = 1;                     // css px per wall row: a screen is FH of them
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:absolute;top:0;width:0;height:100svh;visibility:hidden';
+  document.body.append(probe);
+  function measure() {
+    rowPx = probe.offsetHeight / FH || 1;
+    const ch = Math.max(FH, Math.round(cv.clientHeight / rowPx));
+    if (ch === CH) return;
+    CH = cv.height = ch;
+    if (glass) glass.size();
+  }
+  function lag(k) {                  // rows a layer at pace k trails the page by
+    return (1 - k) * Math.min(scrollY / rowPx, FH);
+  }
+  function s2w(px, py) {             // screen px → wall px, wherever the scroll has it
+    const r = cv.getBoundingClientRect();
+    const y = (py - r.top) / r.height * CH;
+    return [(px - r.left) / r.width * FW, y < HOR ? y - lag(KW) : y];
   }
 
-  /* the ink registry: whatever is currently written on the wall. the
-     colloquy hands us its living elements; we measure them at the cool
-     cadence. calm ones get a shadow pressed under them (a clearing);
-     all of them shear when a scan tear crosses their rows. */
+  /* the ink registry: the page's lines, measured into wall rows at the
+     weather's cadence. a wild slice crossing their rows yanks them
+     sideways; the ambient tears miss them. */
   let inks = [];
-  function setInks(list) {
-    needCool = true;                 // fresh registry: recarve on the next step
+  function setInks(els) {
+    needSurvey = true;               // fresh registry: measure on the next step
     const old = new Map(inks.map(I => [I.el, I]));
-    inks = list.map(o => old.get(o.el) ||
-      { el: o.el, calm: o.calm !== false, wy0: 0, wy1: -1, jolt: 0 });
+    inks = els.map(el => old.get(el) || { el, wy0: 0, wy1: -1, jolt: 0 });
     for (const [el, I] of old)
       if (!inks.includes(I) && I.jolt) el.style.translate = '';
   }
-
-  const tears = [];                  // violent breaches: {cx, cy, r, t0, dur}
-
-  /* the cooling map, rebuilt ~15 Hz. tears carve hard voids with molten
-     rims; clearings press soft graded shadows (calm) under living ink */
-  const dscr = new Float32Array(N);
-  const hard = new Uint8Array(N);
-  const rim  = new Uint8Array(N);
-  const calm = new Uint8Array(N);
-  const p1 = new Uint8Array(N), p2 = new Uint8Array(N);
-  const P1Q = .55 * 255 | 0;         // the quiet decay floor, precomputed
-  let coolFlat = false;              // true ⇒ no tears: hard/rim/p1/p2 are constants
-
-  function carve(r, now, ph) {       // press one clearing into the calm field
-    const [cx, cy] = s2w((r.left + r.right) / 2, (r.top + r.bottom) / 2);
-    const rx = Math.max(3.5, r.width / 2 / innerWidth * FW * 1.08 + 2);
-    const ry = Math.max(2.2, r.height / 2 / innerHeight * FH * 1.30 + 1.6);
-    const x0 = Math.max(0, cx - rx * 1.7 | 0), x1 = Math.min(FW - 1, cx + rx * 1.7 | 0);
-    const y0 = Math.max(0, cy - ry * 2.2 | 0), y1 = Math.min(FH - 1, cy + ry * 2.2 | 0);
-    for (let y = y0; y <= y1; y++) {
-      const wob = 1 + .09 * Math.sin(y * 1.7 + ph + now * .0011);   // edge breathes
-      const dy = (y - cy) / (ry * wob);
-      for (let x = x0; x <= x1; x++) {
-        const dx = (x - cx) / (rx * wob);
-        const q = dx * dx * dx * dx + dy * dy * dy * dy;   // e⁴ — take the root
-        if (q >= 5.772) continue;                          // only at the fringe (1.55⁴)
-        const v = q <= 1 ? 255                             // full inside, soft fringe
-                : (1.55 - Math.sqrt(Math.sqrt(q))) / .55 * 255 | 0;
-        const i = y * FW + x;
-        if (v > calm[i]) calm[i] = v;
-      }
-    }
-  }
-
-  function rebuildCool(now) {
-    for (let t = tears.length - 1; t >= 0; t--)
-      if (now - tears[t].t0 >= tears[t].dur) tears.splice(t, 1);
-    if (!tears.length) {
-      /* no open wounds: the whole field is one constant. write it once and
-         let fade() take the quiet road until the next click */
-      if (!coolFlat) { hard.fill(0); rim.fill(0); p1.fill(P1Q); p2.fill(0); coolFlat = true; }
-    } else {
-      coolFlat = false;
-      dscr.fill(1e9);
-      for (const tr of tears) {
-        const p = (now - tr.t0) / tr.dur;
-        const o = p < .12 ? 1 - Math.pow(1 - p / .12, 3)
-                          : Math.cos((p - .12) / .88 * Math.PI / 2);
-        const x0 = Math.max(1, tr.cx - tr.r * 2 | 0), x1 = Math.min(FW - 2, tr.cx + tr.r * 2 | 0);
-        const y0 = Math.max(1, tr.cy - tr.r * 2 | 0), y1 = Math.min(FH - 2, tr.cy + tr.r * 2 | 0);
-        for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
-          const i = y * FW + x;
-          const dx = (x - tr.cx) / tr.r, dy = (y - tr.cy) / tr.r;
-          const d = (Math.sqrt(dx * dx + dy * dy) - o) * tr.r;
-          if (d < dscr[i]) dscr[i] = d;
-        }
-      }
-      for (let i = 0; i < N; i++) {
-        const d = dscr[i];
-        hard[i] = d <= 0 ? 1 : 0;
-        rim[i] = d > -1.4 && d < 1.8 ? 1 : 0;
-        /* decay is brisk (floor .55) so the heat layer's glow stays local to
-           seeds and rims — the curtain carries the ambient light now */
-        const base = d <= 0 ? 2.4 : Math.max(.55, 2.4 - d * .095);
-        p1[i] = Math.min(base, 1) * 255;
-        p2[i] = Math.max(0, Math.min(base - 1, 1)) * 255;
-      }
-    }
-    calm.fill(0);
+  function survey(now) {
     inks = inks.filter(I => I.el.isConnected);
-    let ph = 0;
     for (const I of inks) {
       const r = I.el.getBoundingClientRect();
-      ph += 2.7;
       if (!r.width || !r.height) { I.wy1 = -1; continue; }
-      I.wy0 = Math.max(0, (r.top / innerHeight * FH - 1) | 0);
-      I.wy1 = Math.min(FH - 1, Math.ceil(r.bottom / innerHeight * FH) + 1);
-      if (I.calm) carve(r, now, ph);
+      I.wy0 = Math.max(0, (s2w(0, r.top)[1] - 1) | 0);
+      I.wy1 = Math.min(FH - 1, Math.ceil(s2w(0, r.bottom)[1]) + 1);
     }
-    weather(now);                    // the weather turns at the cool cadence
+    weather(now);                    // the weather turns at the same cadence
   }
+  const P1Q = .55 * 255 | 0;         // the heat's decay odds, precomputed
 
   let mode = 'idle';                 // 'idle' | 'working'
 
   /* attention: the spot the wall is watching. it wanders when you idle,
-     and comes to your caret when you speak. the weather burns around it. */
+     and comes to your cursor. the weather burns around it. */
   const att = { x: FW / 2, y: FH * .45, tx: FW * .5, ty: FH * .4, hold: 0 };
   let wanderAt = 4000;
-  function attend(px, py, ms) {
-    const p = s2w(px, py);
-    att.tx = p[0]; att.ty = p[1];
-    att.hold = performance.now() + (ms || 4000);
-    lively(1400);
-  }
   let gatherUntil = 0, gx = 0, gy = 0;
   function gather(px, py, ms) {      // the wall draws itself in before it speaks
     const p = s2w(px, py);
@@ -420,24 +338,19 @@
   }
 
   /* ── the weather ──
-     a coarse field of blood-light drifting behind the curtain. brightness
-     blooms and starves; hue runs red, and only the strongest cold patches
-     survive as violet. two burns ride it: a furnace that wanders the far
+     a coarse field of light drifting behind the curtain. brightness blooms
+     and starves; hue runs teal, and only the strongest deep patches survive
+     as indigo. two burns ride it: a furnace that wanders the far
      side, and the wall's own gaze — it glows where it looks, and it looks
      at your hands. */
   const GW = 31, GH = 18;
-  const aurB = new Uint8Array(N), hueIx = new Uint8Array(N);
   const gB = new Float32Array(GW * GH), gH = new Float32Array(GW * GH);
-  const bx0 = new Uint16Array(FW), bx1 = new Uint16Array(FW), bxf = new Float32Array(FW),
-        bxn = new Uint16Array(FW), rowB = new Float32Array(GW);
-  for (let x = 0; x < FW; x++) {
-    const g = x / FW * (GW - 1);
-    bx0[x] = g | 0; bx1[x] = Math.min(GW - 1, (g | 0) + 1); bxf[x] = g - (g | 0);
-    bxn[x] = bxf[x] < .5 ? bx0[x] : bx1[x];
-  }
+  const wx = new Uint16Array(GW * GH * 2);       // both, fixed-point, for the glass
+  let wxUp = false;
   const furn = { x: GW * .62, y: GH * .40, tx: GW * .62, ty: GH * .40, at: 0 };
+  let warp = 0;                      // time the wall skipped while you weren't looking
   function weather(now) {
-    const T = still ? now * .3 : now;
+    const T = (still ? now * .3 : now) + warp;
     if (now > furn.at) {
       furn.tx = GW * (.12 + rnd() * .76); furn.ty = GH * (.10 + rnd() * .60);
       furn.at = now + 7000 + rnd() * 9000;
@@ -459,12 +372,12 @@
       b += .34 * Math.exp(-(dx * dx + dyy * dyy));           // the gaze
       if (b > .95) b = .95 + (b - .95) * .5;       // soft knee on the highs
       gB[cy * GW + cx] = b < .04 ? .04 : b > 1.4 ? 1.4 : b;
-      h = (h - .46) * 2.2;           // only the strong cold survives; it runs red
+      h = (h - .46) * 2.2;           // only the strong deep survives; the rest runs teal
       gH[cy * GW + cx] = h < 0 ? 0 : h > 1 ? 1 : h;
     }
     /* auto-exposure: when the sine phases align and the whole field runs
        hot, pull the frame back to its light budget — shapes keep their
-       contrast, the wall keeps its dark. EXPO is the knob: lower = moodier. */
+       contrast, the wall keeps its dark. */
     const EXPO = .60;                // the light budget: lower = moodier
     const DEPTH = .19;               // the spread floor: higher = starker
     const NG = GW * GH;
@@ -487,22 +400,8 @@
         gB[i] = b < .04 ? .04 : b > 1.4 ? 1.4 : b;
       }
     }
-
-    // pour the weather onto the pixels: bilinear is separable, so blend each
-    // grid row once and the sweep needs only the x-mix; nearest hue from a LUT
-    for (let y = 0; y < FH; y++) {
-      const g = y / FH * (GH - 1), y0 = g | 0, fy = g - y0;
-      const r0 = y0 * GW, r1 = Math.min(GH - 1, y0 + 1) * GW;
-      for (let c = 0; c < GW; c++) rowB[c] = gB[r0 + c] + (gB[r1 + c] - gB[r0 + c]) * fy;
-      const row = y * FW, rh = fy < .5 ? r0 : r1;
-      for (let x = 0; x < FW; x++) {
-        const b0 = rowB[bx0[x]];
-        const b = b0 + (rowB[bx1[x]] - b0) * bxf[x];
-        const a8 = b * 237;          // 128 ≈ neutral; the furnace doubles it
-        aurB[row + x] = a8 > 255 ? 255 : a8;
-        hueIx[row + x] = (gH[rh + bxn[x]] * 7.99) | 0;
-      }
-    }
+    for (let i = 0; i < NG; i++) { wx[2 * i] = Math.round(gB[i] * 237 * 64); wx[2 * i + 1] = (gH[i] * 7.99) | 0; }
+    wxUp = true;                     // the glass spreads it over the pixels
   }
 
   /* ── the curtain ──
@@ -514,9 +413,9 @@
   const baseCol = new Uint8Array(FW), spdCol = new Uint8Array(FW),
         offCol  = new Uint8Array(FW), topCol = new Uint8Array(FW),
         cb      = new Uint8Array(FW), colVi  = new Uint8Array(FW);
-  {
+  function mintCurtain() {
     /* the ground walk stays low — the dark is the fabric, strands are the
-       exception. bright bundles 1-4 columns wide land on it at a fixed
+       exception. bright bundles 1-3 columns wide land on it at a fixed
        rate, so every minting has the same sparse comb; only the placement
        differs. STRAND_P is the knob: higher = busier wall. */
     const STRAND_P = .075;
@@ -537,6 +436,7 @@
       topCol[x] = rnd() < .3 ? (rnd() * 9) | 0 : 0;   // a ragged upper hem
     }
   }
+  mintCurtain();
   const heroes = [];                 // a few strands burn brighter than their sisters
   for (let i = 0; i < 9; i++) heroes.push({ x: (rnd() * FW) | 0 });
   let heroSwapAt = 6000;
@@ -544,8 +444,8 @@
   const stripOf = new Uint8Array(FW);
   const stripMul = new Uint8Array(64), stripOff = new Uint8Array(64);
   let NS = 0;
-  {
-    let x0 = 0;
+  function mintStrips() {
+    let x0 = 0; NS = 0;
     while (x0 < FW && NS < 64) {
       const w = 8 + ((rnd() * 22) | 0);
       for (let x = x0; x < Math.min(FW, x0 + w); x++) stripOf[x] = NS;
@@ -553,6 +453,16 @@
       stripOff[NS] = (rnd() * 256) | 0;
       NS++; x0 += w;
     }
+  }
+  mintStrips();
+  /* a new generation: the same wall, minted again, later. what was frozen
+     in it is gone, the others are somewhere else. */
+  function reseed() {
+    mintCurtain(); mintStrips();
+    for (const h of heroes) h.x = (rnd() * FW) | 0;
+    warp += 40000 + rnd() * 60000;
+    furn.x = furn.tx = GW * (.12 + rnd() * .76); furn.y = furn.ty = GH * (.10 + rnd() * .60);
+    cur.fill(0); nxt.fill(0);
   }
   function glitchStrip() {           // one panel forgets itself
     const s = (rnd() * NS) | 0;
@@ -569,11 +479,55 @@
     vmod[k] = Math.max(80, Math.min(255, 234 * wave * dash));
   }
   let flow = 0;
+  /* linked: the wall splits into three repos, one each, seams between
+     them. the frozen code jumps vertically in hard steps wherever they
+     push through it: where they land, along the way, and under every
+     packet. */
+  const colJolt = new Int16Array(FW), colGlow = new Uint8Array(FW), colTint = new Uint8Array(FW);
+  const REG = [[FW * 2 / 3 | 0, FW], [0, FW / 3 | 0], [FW / 3 | 0, FW * 2 / 3 | 0]];
+  let linkPh = 0, linkA = 0, linkT0 = 0, linkDirty = false;
+  const colTmp = new Uint8Array(HOR);
+  function jolt(c, d) {              // a column of frozen code jumps d rows, hard
+    colJolt[c] = (colJolt[c] + d) & 255;
+    for (let y = 0; y < HOR; y++) colTmp[(y + d + HOR * 4) % HOR] = cur[y * FW + c];
+    for (let y = 0; y < HOR; y++) cur[y * FW + c] = colTmp[y];
+  }
+  function touchCols(x, sc) {        // one of them lands: the code under it shifts
+    for (let c = Math.max(0, x - 8 * sc | 0); c < Math.min(FW, x + 8 * sc | 0); c++) {
+      jolt(c, ((rnd() - .5) * 60) | 0);
+      colGlow[c] = 90;
+    }
+  }
+  function wake(xa, xb, amp, glow) {  // the columns between two x's, pushed through
+    const a = Math.max(0, Math.min(xa, xb) | 0), b = Math.min(FW - 1, Math.max(xa, xb) | 0);
+    for (let c = a; c <= b; c++) {
+      jolt(c, ((rnd() < .5 ? -1 : 1) * (1 + rnd() * amp)) | 0);
+      if (glow > colGlow[c]) colGlow[c] = glow;
+    }
+  }
+  function linkFrame(dt) {
+    linkA = linkPh ? Math.min(1, linkA + dt / 250) : Math.max(0, linkA - dt / 600);
+    if (!linkA) {
+      if (linkDirty) { colJolt.fill(0); colGlow.fill(0); colTint.fill(0); linkDirty = false; }
+      return;
+    }
+    linkDirty = true;
+    colTint.fill(0);
+    for (let c = 0; c < FW; c++) {
+      colGlow[c] = (colGlow[c] * .6) | 0;
+      if (!linkPh) colJolt[c] = (colJolt[c] * .8) | 0;
+    }
+    for (const b of [REG[1][1], REG[2][1]]) {            // the seams between repos
+      colTint[b] = 1;
+      colGlow[b] = Math.max(colGlow[b], (190 * linkA) | 0);
+    }
+  }
   function dressColumns() {          // per frame: the columns, refreshed
     const fI = flow | 0;
     for (let x = 0; x < FW; x++) {
       cb[x] = (baseCol[x] * stripMul[stripOf[x]]) >> 8;
-      colVi[x] = (offCol[x] + stripOff[stripOf[x]] - ((fI * spdCol[x]) >> 4)) & 255;
+      colVi[x] = (offCol[x] + stripOff[stripOf[x]] - ((fI * spdCol[x]) >> 4) + colJolt[x]) & 255;
+      if (colGlow[x]) { const v = cb[x] + ((colGlow[x] * linkA) | 0); cb[x] = v > 255 ? 255 : v; }
     }
     for (const h of heroes) {
       const v = cb[h.x] + 110;
@@ -582,12 +536,11 @@
   }
 
   /* ── the others ──
-     they used to walk the far side as shadows. they have come closer.
      where they press against the veil the strands light up around their
      shapes — a head, a torso, a long skirt of glow — and now and then one
-     flares like it wants to be seen. they still drift toward whatever the
-     wall is watching. through a torn-open wound you can glimpse one raw:
-     cold violet-white, the color of the far side. */
+     flares like it wants to be seen. they drift toward whatever the wall is
+     watching. when they come through they're raw: periwinkle-white, the
+     color of the far side. */
   const apps = [   // they keep to the margins, mostly, where the ink isn't
     { ax: .80, ay: .36, wx: .10, wy: .09, s1: .000029, s2: .000041, ph: 0,   pull: .26, sc: 2.4,  base: 124 },
     { ax: .11, ay: .55, wx: .10, wy: .15, s1: .000043, s2: .000031, ph: 2.2, pull: .48, sc: 1.1,  base: 40 },
@@ -595,8 +548,18 @@
   ];
   const appB = new Uint8Array(N);
   const flare = { i: -1, t0: 0, at: 9000 };
+  const appC = apps.map(() => [0, 0]);          // each one's chest, in wall px
+  const charge = apps.map(() => 0);             // what it's holding: 0..1 as it eats, more as it links
+  /* hunting they stop being weather: hard-edged, rimmed, their own
+     colour, and they move in steps: hold, snap, hold. */
+  let solidA = 0, lastPA = 0;
+  const FORM = [1, -1, -1], FORMGAP = [6, 4, 34];   // tall one right, the small two left,
+  const FORMY = [0, -24, 22];                        // one high, one low: a triangle to link
   function pressApparitions(now) {
     appB.fill(0);
+    const dtp = Math.min(100, now - (lastPA || now)); lastPA = now;
+    solidA = gone ? 0
+           : hunting || linkPh ? Math.min(1, solidA + dtp / 200) : Math.max(0, solidA - dtp / 1200);
     if (!still && now > flare.at) {
       flare.i = (rnd() * apps.length) | 0;
       flare.t0 = now;
@@ -606,12 +569,54 @@
     const lean = now < gatherUntil ? 1.8 : 1;      // they crowd in when it speaks
     for (let k = 0; k < apps.length; k++) {
       const e = apps[k];
-      const bx = e.ax + e.wx * Math.sin(now * e.s1 + e.ph);
-      const by = e.ay + e.wy * Math.sin(now * e.s2 + e.ph * 1.7);
+      const bx = e.ax + e.wx * Math.sin((now + warp) * e.s1 + e.ph);
+      const by = e.ay + e.wy * Math.sin((now + warp) * e.s2 + e.ph * 1.7);
       const pull = Math.min(.8, e.pull * lean);
-      const cx = (bx + (afx - bx) * pull) * FW;
-      const cy = (by + (afy - by) * pull) * FH;
+      let cx = (bx + (afx - bx) * pull) * FW;
+      let cy = (by + (afy - by) * pull) * FH;
+      const S = e.st || (e.st = { x: cx, y: cy, fx: cx, fy: cy, tx: cx, ty: cy, t0: -1e9, next: 0, ox: 0, oy: 0 });
+      if (solidA && !hunting && !linkPh) {          // done: they hold their places
+        cx = S.x; cy = S.y; S.hold = true;
+      } else if (solidA) {
+        if (now > S.next) {
+          let tx = cx, ty = cy, cap = 34, gap = 260 + rnd() * 380;
+          const ylo = 19 * e.sc + 8, yhi = HOR - 28 * e.sc - 6;
+          if (hunting) {                           // hunting: either side of the name
+            tx = formMid + FORM[k] * (formHalf + 12 * e.sc + FORMGAP[k]);
+            ty = gy + 2 * e.sc + FORMY[k];
+          } else if (linkPh === 1) {               // linked: somewhere else in its own repo
+            const [r0, r1] = REG[k];
+            tx = r0 + 16 + rnd() * (r1 - r0 - 32);
+            ty = ylo + rnd() * (yhi - ylo);
+            cap = 90; gap = 420 + rnd() * 380; S.touch = now + 90;
+          } else {                                 // the last link: round the name, one below it
+            tx = k === 2 ? formMid : formMid + FORM[k] * (formHalf + 12 * e.sc + 6);
+            ty = k === 2 ? Math.min(yhi, gy + 70) : gy + 2 * e.sc;
+            cap = 110; gap = 160;
+          }
+          const dx = tx - S.x, dy = ty - S.y, d = Math.hypot(dx, dy);
+          if (d > cap) { tx = S.x + dx / d * cap; ty = S.y + dy / d * cap; }
+          S.fx = S.x; S.fy = S.y; S.tx = tx; S.ty = ty;
+          S.t0 = now; S.next = now + gap;
+        }
+        if (S.touch && now >= S.touch) { S.touch = 0; if (linkPh === 1) touchCols(S.tx | 0, e.sc); }
+        const q = Math.min(1, (now - S.t0) / 90), e3 = 1 - (1 - q) * (1 - q) * (1 - q);
+        const px = S.x;
+        S.x = S.fx + (S.tx - S.fx) * e3; S.y = S.fy + (S.ty - S.fy) * e3;
+        if (linkPh === 1 && q < 1) wake(px - 5 * e.sc, S.x + 5 * e.sc, 10, 70);   // the code it pushes through
+        cx = S.x; cy = S.y;
+      } else {                                     // and let go of them slowly
+        if (S.hold) { S.hold = false; S.ox = S.x - cx; S.oy = S.y - cy; }
+        const f = Math.pow(.9985, dtp);
+        S.ox *= f; S.oy *= f;
+        cx += S.ox; cy += S.oy;
+        S.x = cx; S.y = cy; S.next = 0;
+      }
+      appC[k][0] = cx; appC[k][1] = cy - 2 * e.sc;
       let br = e.base * (mode === 'working' ? 1.3 : 1);
+      const fd = now - faintT;                     // back beyond: a glow somewhere, then almost nothing
+      br *= fd < 2600 ? 1.9 - 1.7 * Math.pow(fd / 2600, .7) : .2 + .8 * Math.min(1, (fd - 2600) / 9000);
+      br *= 1 + huntA * 1.2 + charge[k] * 2.5;     // they come forward to eat
       if (k === flare.i) {
         const p = (now - flare.t0) / 2400;
         if (p < 1) br *= 1 + 1.5 * Math.sin(Math.PI * p);
@@ -631,7 +636,12 @@
         q = dx * dx + dy * dy; if (q < m) m = q;
         if (m < 1) {
           let g = (1 - m) * 2.2; if (g > 1) g = 1;               // filled body,
-          let v = (g * g * br) | 0; if (v > 255) v = 255;        // soft edge
+          let v = g * g * br;                                    // soft edge
+          if (solidA) {                                          // or hard, rimmed, lit from within
+            const body = m > .86 ? 190 : (70 + charge[k] * 45) * (1.2 - .6 * m);
+            v += (body - v) * solidA;
+          }
+          v = v > 255 ? 255 : v | 0;
           const i = y * FW + x;
           if (v > appB[i]) appB[i] = v;
         }
@@ -640,7 +650,7 @@
   }
 
   /* ── the floor ──
-     a sea of burnt packets at the wall's foot: clumped dust that twinkles
+     a sea of spent packets at the wall's foot: clumped dust that twinkles
      and creeps, a hot seam where wall meets ground, and the curtain's own
      reflection streaking a few rows down into the dark. */
   const DOTN = 420;
@@ -686,7 +696,7 @@
     }
   }
 
-  // watchers: small and unlit at the foot of it. they came to look. one paces.
+  // watchers: small and unlit at the foot of it. they came to look. two pace.
   const watchers = [
     { x: FW * .30, v: 0 }, { x: FW * .44, v: .012 },
     { x: FW * .58, v: 0 }, { x: FW * .71, v: -.009 },
@@ -709,49 +719,27 @@
   }
 
   /* the fall of the heat layer: stamped light decays where it lands, so
-     every runner keeps a knife-crisp comet tail. (the old dust motes are
-     gone — the curtain carries the ambient light now.) */
+     every runner keeps a knife-crisp comet tail */
   function fade() {
+    /* one constant decay, and the wall is mostly dark: skim it four pixels
+       at a stride and spend randomness only where something still burns */
     let r = rs;
-    if (coolFlat) {
-      /* the quiet road: no tears means no rims to crackle and one constant
-         decay — and the wall is mostly dark. skim it four pixels at a stride
-         and spend randomness only where something still burns */
-      nxt32.fill(0);
-      for (let i = 0; i < N; i += 4) {
-        if (cur32[i >> 2] === 0) continue;
-        for (let j = i; j < i + 4; j++) {
-          const c = cur[j];
-          if (!c) continue;
-          r ^= r << 13; r ^= r >>> 17; r ^= r << 5;
-          let cool = (r >>> 24) < P1Q ? 1 : 0;
-          const cm = calm[j];
-          if (cm) cool += 1 + ((cm * 3) >> 8);  // shadows eat slower
-          nxt[j] = c > cool ? c - cool : 0;
-        }
+    nxt32.fill(0);
+    for (let i = 0; i < N; i += 4) {
+      if (cur32[i >> 2] === 0) continue;
+      for (let j = i; j < i + 4; j++) {
+        const c = cur[j];
+        if (!c) continue;
+        r ^= r << 13; r ^= r >>> 17; r ^= r << 5;
+        nxt[j] = (r >>> 24) < P1Q ? c - 1 : c;
       }
-    } else for (let i = 0; i < N; i++) {
-      r ^= r << 13; r ^= r >>> 17; r ^= r << 5;
-      let cool = ((r >>> 24) < p1[i] ? 1 : 0) + (((r >>> 16) & 255) < p2[i] ? 1 : 0);
-      if (hard[i]) cool += 9;        // no wall inside a tear — data is devoured
-      else if (calm[i]) cool += 1 + ((calm[i] * 3) >> 8);   // shadows eat slower
-      const c = cur[i];
-      let v = c > cool ? c - cool : 0;
-      if (rim[i] && ((r >>> 8) & 255) < 26) {   // a tear's edge stays molten
-        const g = ((r >>> 16) & 255) < 20
-          ? 32 + ((r >>> 28) & 3)               // pink-white crackle
-          : 17 + ((r >>> 24) & 15);
-        if (g > v) v = g;
-      }
-      nxt[i] = v;
     }
     rs = r;
   }
 
   /* the runners: bright pulses that fall the strands (dashed — data, not
      water), plus a few slow monumental conduits. near the attention point
-     they slow and brighten — the wall, leaning in. crossing a clearing
-     they thin to ghosts; ink outranks weather. the floor takes them. */
+     they slow and brighten — the wall, leaning in. the floor takes them. */
   const streams = [];
   function reroll(s, fromTop) {
     s.x = (rnd() * FW) | 0;
@@ -764,7 +752,7 @@
   }
   for (let i = 0; i < 130; i++) { const s = {}; reroll(s, false); streams.push(s); }
 
-  function advanceStreams(buf) {
+  function advanceStreams() {
     const sp = mode === 'working' ? 1.55 : 1;
     const hot = mode === 'working' ? 2 : 0;
     for (const s of streams) {
@@ -782,12 +770,9 @@
         for (let k = 0; k < tall; k++) {
           const y = hy - k; if (y < 0 || y >= FH) continue;
           const i = y * FW + x;
-          if (hard[i]) continue;                    // pours into the tear, gone
           let v = s.heat + hot + (near ? 2 : 0) - k - ((rnd() * 3) | 0);
-          const cm = calm[i];
-          if (cm) v = (v * (300 - cm) / 300) | 0;   // ghost-faint over the ink
           if (v > MAX) v = MAX;
-          if (v > buf[i]) buf[i] = v;
+          if (v > cur[i]) cur[i] = v;
         }
       }
     }
@@ -795,7 +780,7 @@
 
   /* risers: your words, consumed. when a line is absorbed it bursts into
      spark-trains that swim UP the wall — against the fall — cooling as
-     they climb, until the dark takes them. answers fall; questions rise. */
+     they climb, until the dark takes them. */
   const risers = [];
   function absorbRect(r) {
     const a = s2w(r.left, r.top + r.height / 2);
@@ -809,21 +794,22 @@
         heat: 26 + ((rnd() * 11) | 0),
         gap: 0, life: 110 + ((rnd() * 70) | 0),
       });
+    for (let i = 0; i < 12; i++) spawnEmber((r.left + r.right) / 2, r.top);
+    lively(1800);
   }
-  function advanceRisers(buf) {
+  function advanceRisers() {
     for (let i = risers.length - 1; i >= 0; i--) {
       const s = risers[i];
-      s.y -= s.v; s.life--; s.heat -= .08;          // they cool as they climb
-      if (s.y < -4 || s.life <= 0 || s.heat < 8) { risers.splice(i, 1); continue; }
+      s.y -= s.v; s.life--; s.heat -= .08;          // they cool as they go
+      if (s.y < -4 || s.y > HOR || s.life <= 0 || s.heat < 8) { risers.splice(i, 1); continue; }
       if (s.gap > 0) { s.gap--; continue; }
       if (rnd() < .06) { s.gap = 1 + ((rnd() * 4) | 0); continue; }
-      const x = s.x | 0, hy = s.y | 0;
+      const x = s.x | 0, hy = s.y | 0, tail = s.v < 0 ? -1 : 1;   // melted letters fall
       for (let k = 0; k < 3; k++) {
-        const y = hy + k; if (y < 0 || y >= FH) continue;
+        const y = hy + k * tail; if (y < 0 || y >= FH) continue;
         const j = y * FW + x;
-        if (hard[j]) continue;
-        const v = (s.heat - k * 2 - rnd() * 3) | 0;  // unshadowed:
-        if (v > buf[j]) buf[j] = v;                 // your fire outranks the calm
+        const v = (s.heat - k * 2 - rnd() * 3) | 0;
+        if (v > cur[j]) cur[j] = v;
       }
     }
   }
@@ -834,6 +820,63 @@
   const rowDx = new Int16Array(FH), rowBoost = new Uint8Array(FH);
   const rowWild = new Uint8Array(FH);
   let burstAt = 2200, burstN = 0, pulseAt = 5200, pulseT0 = -1;
+
+  /* the hunt: they come forward, either side of where the name will be,
+     until the last code is eaten and the wall freezes on one bright frame */
+  let hunting = false, huntT0 = 0, huntA = 0, snapFlash = false;
+  let formMid = 0, formHalf = 60;             // where the others stand while they eat
+  function hunt(mid, half) {
+    hunting = true; huntT0 = performance.now(); lively(8000);
+    formMid = mid; formHalf = half;
+  }
+  function huntEnd() { if (hunting) { hunting = false; snapFlash = true; lively(600); } }
+
+  /* shatter: the wall round a point breaks into blocks that jump, hard,
+     one frame of it blown bright; they jump once more, and snap back.
+     no easing anywhere. a click, and every code they eat. */
+  const shatters = [];
+  const shD = new Int8Array(3 * N);              // three planes: dx, dy, lit (0, 1, 2)
+  const shDx = shD.subarray(0, N), shDy = shD.subarray(N, 2 * N), shB = shD.subarray(2 * N);
+  let shOn = false, shUp = false;
+  function shatter(cx, cy, r, dur) {
+    const blocks = [];
+    for (let y = Math.round(cy - r); y < cy + r;) {
+      const h = 3 + ((rnd() * 4) | 0);
+      for (let x = Math.round(cx - r * 1.3 - rnd() * 4); x < cx + r * 1.3;) {
+        const w = 4 + ((rnd() * 7) | 0);
+        const ex = (x + w / 2 - cx) / (r * 1.3), ey = (y + h / 2 - cy) / r;
+        if (ex * ex + ey * ey < .55 + rnd() * .6) {
+          const jump = () => (rnd() < .5 ? -1 : 1) * (3 + ((rnd() * 12) | 0));
+          const hop = () => rnd() < .3 ? (rnd() < .5 ? -1 : 1) * (1 + ((rnd() * 2) | 0)) : 0;
+          blocks.push({ x, y, w, h, dx: jump(), dy: hop(), dx2: jump() >> 1, dy2: hop(), hot: rnd() < .55 });
+        }
+        x += w;
+      }
+      y += h;
+    }
+    shatters.push({ blocks, t0: performance.now(), dur });
+    lively(dur + 200);
+  }
+  function buildShatters(now) {
+    if (!shatters.length) { if (shOn) { shD.fill(0); shOn = false; shUp = true; } return; }
+    shD.fill(0); shOn = shUp = true;
+    for (let k = shatters.length - 1; k >= 0; k--) {
+      const S = shatters[k], t = now - S.t0;
+      if (t >= S.dur) { shatters.splice(k, 1); continue; }
+      const late = t > S.dur * .55, blown = t < 34;
+      for (const b of S.blocks) {
+        const dx = late ? b.dx2 : b.dx, dy = late ? b.dy2 : b.dy, hot = b.hot ? (blown ? 2 : 1) : 0;
+        for (let y = b.y; y < b.y + b.h; y++) {
+          if (y < 0 || y >= HOR) continue;
+          for (let x = b.x; x < b.x + b.w; x++) {
+            if (x < 0 || x >= FW) continue;
+            const i = y * FW + x;
+            shDx[i] = dx; shDy[i] = dy; shB[i] = hot;
+          }
+        }
+      }
+    }
+  }
   function spawnSlice(cy, now) {
     let y0;
     if (cy != null)
@@ -847,40 +890,286 @@
     }
     slices.push({
       y0, h: 3 + ((rnd() * 10) | 0),
-      wild: cy != null,              // click-born slices may savage the text
+      wild: cy != null,              // aimed slices (a click, a bite) may savage the text
       dx: (rnd() < .5 ? -1 : 1) * (6 + ((rnd() * 36) | 0)),
       until: now + 30 + rnd() * 90,
       boost: rnd() < .45 ? 3 : 0,
     });
   }
 
+  /* ── the glass ──
+     the sim lives in the arrays above; the GPU puts them together. each
+     layer goes up as a texture, one shader weaves the wall out of them,
+     the embers add on top, and the last pass is the impact or the flash. */
+  const VS = `#version 300 es
+void main() { gl_Position = vec4(vec2(gl_VertexID & 1, gl_VertexID >> 1) * 4. - 1., 0, 1); }`;
+  const WALL = `#version 300 es
+precision highp float; precision highp int;
+precision highp usampler2D; precision highp isampler2D;
+uniform usampler2D heat, app, flr, glyph, col, rows, lut, vig, pal;
+uniform usampler2D wx;
+uniform isampler2D shat;
+uniform int solid;                                         // 0..256
+uniform int pan, deep;                     // rows the wall trails the page by; what's behind it, further
+uniform int CH;                            // the canvas's rows
+uniform float t;                           // seconds, for the dust under the page
+out vec4 o;
+const int FW = ${FW}, FH = ${FH}, HOR = ${HOR}, MAX = ${MAX}, GW = ${GW}, GH = ${GH}, SX = FW / (GW - 1);
+int u8(usampler2D t, int x, int y) { return int(texelFetch(t, ivec2(x, y), 0).r); }
+ivec2 weather(int x, int y) {            // brightness, bilinear; hue, nearest. all integer,
+  int ty = y * (GH - 1), y0 = ty / FH, fy = ty - y0 * FH, y1 = min(GH - 1, y0 + 1);   // so every
+  int x0 = x / SX, fx = x - x0 * SX, x1 = min(GW - 1, x0 + 1);                     // GPU agrees
+  ivec2 a0 = ivec2(texelFetch(wx, ivec2(x0, y0), 0).rg), a1 = ivec2(texelFetch(wx, ivec2(x0, y1), 0).rg),
+        b0 = ivec2(texelFetch(wx, ivec2(x1, y0), 0).rg), b1 = ivec2(texelFetch(wx, ivec2(x1, y1), 0).rg);
+  int l = a0.x * (FH - fy) + a1.x * fy, r = b0.x * (FH - fy) + b1.x * fy;
+  int b = (l * (SX - fx) + r * fx) / (64 * FH * SX);     // 128 is neutral; the furnace doubles it
+  int h = fy * 2 < FH ? (fx * 2 < SX ? a0.y : b0.y) : (fx * 2 < SX ? a1.y : b1.y);
+  return ivec2(min(b, 255), h);
+}
+uint hsh(uint x) { x ^= x >> 16; x *= 0x7feb352du; x ^= x >> 15; x *= 0x846ca68bu; x ^= x >> 16; return x; }
+float drift(int i, int j) { return float(hsh(uint(i % 20) * 73856093u ^ uint(j) * 19349663u) & 255u) / 255.; }
+int dust(int x, int c) {                   // the floor under the page: spent packets, drifting
+  float v = (float(hsh(uint(c) * 2654435761u) & 255u) / 255. - .5) * 1.8;   // each row creeps its own way
+  uint h = hsh(uint(mod(float(x) - t * v, float(FW))) * 2246822519u ^ uint(c) * 3266489917u);
+  float gx = float(x) / 24., gy = float(c) / 12.;          // where it gathers
+  int ix = int(gx), iy = int(gy);
+  float fx = fract(gx), fy = fract(gy);
+  float d = mix(mix(drift(ix, iy), drift(ix + 1, iy), fx), mix(drift(ix, iy + 1), drift(ix + 1, iy + 1), fx), fy);
+  if (float(h & 4095u) >= 4096. * (.003 + .028 * d * d)) return 0;
+  float a = (h >> 20 & 7u) == 0u ? 160. + float(h >> 24 & 63u) : 40. + float(h >> 12 & 63u);
+  return int(a * (.6 + .4 * sin(t * 1.6 + float(h >> 26) * .1)));
+}
+void main() {
+  int x = int(gl_FragCoord.x), c = CH - 1 - int(gl_FragCoord.y);   // the canvas row
+  int y = c < HOR ? c - pan : c;                           // the wall's own
+  if (y < 0) { o = vec4(0, 0, 0, 1); return; }             // above its top: nothing
+  uvec2 R = y < FH ? texelFetch(rows, ivec2(y, 0), 0).rg : uvec2(128, 0);   // the tear's shift, the row's boost
+  int vg = u8(vig, x, c < FH ? c : FH / 2) + 128;          // the glass's own falloff; below, the sides'
+  int sx = x - (int(R.r) - 128), sy = y, hue = 0, lvl, c8 = 0;
+  if (c < HOR) {
+    ivec3 S = ivec3(texelFetch(shat, ivec2(x, y), 0).r, texelFetch(shat, ivec2(x, y + FH), 0).r,
+                    texelFetch(shat, ivec2(x, y + 2 * FH), 0).r);   // a shattered block reads from where it jumped
+    sx -= S.x; sy = clamp(sy - S.y, 0, HOR - 1);
+    sx = sx < 0 ? sx + FW : sx >= FW ? sx - FW : sx;
+    uvec4 C = texelFetch(col, ivec2(sx, 0), 0);            // strength, phase, hem, seam
+    int by = sy - deep;                                     // behind the strands, further off
+    ivec2 W = weather(sx, max(by, 0));
+    int ap = 0, abv = 0, vm = 0;
+    if (sy >= int(C.b)) {
+      vm = u8(lut, (sy + int(C.g)) & 255, 0);                // the weave
+      c8 = (((int(C.r) * vm) >> 8) * W.x) >> 7;
+      abv = by >= 0 ? u8(app, sx, by) : 0;
+      if (abv > 0) ap = (abv * (96 + (vm >> 1))) >> 8;     // their light, striped by the weave
+    }
+    c8 = (min(c8 + ap, 255) * vg) >> 8;
+    int v = (u8(heat, sx, sy) * vg) >> 8, cl = u8(lut, c8, 1);
+    if (v >= cl) lvl = v; else { lvl = cl; hue = C.a > 0u ? 7 : W.y; }
+    if (solid > 0 && abv > 70) {                           // one of them, raw, this side of the wall
+      int L = ((((6 + ((abv * 30) >> 8)) * (200 + (vm >> 2))) >> 8) * vg >> 8) * solid >> 8;
+      if (L >= lvl) { lvl = min(L, MAX); hue = 7; }
+    }
+    int gv = u8(glyph, sx, sy);                             // writing on the wall
+    if (u8(glyph, sx, sy + 2 * FH) > 0) lvl = (lvl * 60) >> 8;
+    if (gv > 0 && (gv * vg) >> 8 >= lvl) { lvl = (gv * vg) >> 8; hue = u8(glyph, sx, sy + FH); }
+    lvl = min(lvl + int(R.g) + (S.z == 2 ? 14 : S.z == 1 ? 4 : 0), MAX);
+  } else if (c >= FH) {                                     // the floor on under the page
+    lvl = u8(lut, (dust(x, c) * vg) >> 8, 1);
+  } else {                                                  // the floor
+    int dy = y - HOR;
+    sx = sx < 0 ? sx + FW : sx >= FW ? sx - FW : sx;
+    uvec4 C = texelFetch(col, ivec2(sx, 0), 0);
+    uvec2 D = texelFetch(col, ivec2(sx, 1), 0).rg;         // a watcher: its dim, its head
+    ivec2 W = weather(sx, y);
+    c8 = dy < 2 ? (int(C.r) * 340) >> 8                     // the hot seam at its foot
+       : dy < 16 ? (((int(C.r) * u8(lut, dy, 2)) >> 8) * u8(lut, (y + int(C.g)) & 255, 0)) >> 8 : 0;
+    c8 = min((max(c8, u8(flr, sx, y)) * W.x) >> 7, 255);
+    if (dy < 6 && D.r < 255u && dy >= int(D.g)) c8 = (c8 * int(D.r)) >> 8;
+    c8 = (c8 * vg) >> 8;
+    int v = (u8(heat, sx, y) * vg) >> 8, cl = u8(lut, c8, 1);
+    if (v >= cl) lvl = v; else { lvl = cl; hue = W.y; }
+    lvl = min(lvl + int(R.g), MAX);
+  }
+  o = vec4(texelFetch(pal, ivec2(lvl, ((c & 1) << 3) + hue), 0)) / 255.;   // odd rows: the dim bank
+}`;
+  const EMBERS = [`#version 300 es
+in vec2 p; in vec3 c; out vec3 vc; uniform float ch;
+void main() { gl_Position = vec4((p.x + .5) / ${FW / 2}., 1. - (p.y + .5) * 2. / ch, 0, 1) - vec4(1, 0, 0, 0);
+              gl_PointSize = 1.; vc = c; }`, `#version 300 es
+precision highp float; in vec3 vc; out vec4 o;
+void main() { o = vec4(vc / 255., 1); }`];
+  const SHIP = `#version 300 es
+precision highp float; precision highp int;
+uniform sampler2D img; uniform int impact;
+out vec4 o;
+void main() {
+  ivec3 c = ivec3(round(texelFetch(img, ivec2(gl_FragCoord.xy), 0).rgb * 255.));
+  if (impact > 0) { int v = 255 - max(c.r, max(c.g, c.b)); c = ivec3((v * 214) >> 8, (v * 226) >> 8, v); }
+  o = vec4(vec3(c) / 255., 1);
+}`;
+  const colPk = new Uint8Array(FW * 8), rowPk = new Uint8Array(FH * 2);
+  const emb = new Float32Array(5 * 4096);        // x, y, and what each ember adds to r, g, b
+  let nEmb = 0, glass = null;
+  function makeGlass() {
+    const g = ctx, T = {};
+    const shader = (type, src) => {
+      const s = g.createShader(type); g.shaderSource(s, src); g.compileShader(s);
+      if (!g.getShaderParameter(s, g.COMPILE_STATUS)) throw new Error(g.getShaderInfoLog(s));
+      return s;
+    };
+    const program = (vs, fs) => {
+      const p = g.createProgram();
+      g.attachShader(p, shader(g.VERTEX_SHADER, vs)); g.attachShader(p, shader(g.FRAGMENT_SHADER, fs));
+      g.linkProgram(p);
+      if (!g.getProgramParameter(p, g.LINK_STATUS)) throw new Error(g.getProgramInfoLog(p));
+      return p;
+    };
+    g.pixelStorei(g.UNPACK_ALIGNMENT, 1);
+    let unit = 0;                                // every texture keeps a unit of its own
+    const tex = (name, w, h, ifmt, fmt, type, data) => {
+      const t = g.createTexture();
+      g.activeTexture(g.TEXTURE0 + unit); g.bindTexture(g.TEXTURE_2D, t);
+      g.texStorage2D(g.TEXTURE_2D, 1, ifmt, w, h);
+      g.texParameteri(g.TEXTURE_2D, g.TEXTURE_MIN_FILTER, g.NEAREST);
+      g.texParameteri(g.TEXTURE_2D, g.TEXTURE_MAG_FILTER, g.NEAREST);
+      g.texParameteri(g.TEXTURE_2D, g.TEXTURE_WRAP_S, g.CLAMP_TO_EDGE);
+      g.texParameteri(g.TEXTURE_2D, g.TEXTURE_WRAP_T, g.CLAMP_TO_EDGE);
+      T[name] = { t, unit: unit++, w, h, fmt, type };
+      if (data) up(T[name], data);
+      return T[name];
+    };
+    const U8 = [g.R8UI, g.RED_INTEGER, g.UNSIGNED_BYTE];
+    tex('heat', FW, FH, ...U8); tex('app', FW, FH, ...U8); tex('flr', FW, FH, ...U8);
+    tex('glyph', FW, 3 * FH, ...U8); tex('shat', FW, 3 * FH, g.R8I, g.RED_INTEGER, g.BYTE, shD);
+    tex('col', FW, 2, g.RGBA8UI, g.RGBA_INTEGER, g.UNSIGNED_BYTE);
+    tex('rows', FH, 1, g.RG8UI, g.RG_INTEGER, g.UNSIGNED_BYTE);
+    const lut = new Uint8Array(256 * 3);
+    lut.set(vmod); lut.set(CL, 256); lut.set(reflF, 512);
+    tex('lut', 256, 3, ...U8, lut);
+    tex('vig', FW, FH, ...U8, Uint8Array.from(VIG, v => v - 128));
+    tex('pal', MAX + 1, 16, g.RGBA8UI, g.RGBA_INTEGER, g.UNSIGNED_BYTE, new Uint8Array(PAL.buffer));
+    tex('wx', GW, GH, g.RG16UI, g.RG_INTEGER, g.UNSIGNED_SHORT, wx);
+    const wall = program(VS, WALL);
+    g.useProgram(wall);
+    for (const k in T) g.uniform1i(g.getUniformLocation(wall, k), T[k].unit);
+    const img = tex('img', FW, CH, g.RGBA8, g.RGBA, g.UNSIGNED_BYTE);
+    const fb = g.createFramebuffer();
+    g.bindFramebuffer(g.FRAMEBUFFER, fb);
+    g.framebufferTexture2D(g.FRAMEBUFFER, g.COLOR_ATTACHMENT0, g.TEXTURE_2D, img.t, 0);
+    const size = () => {                         // the page grew or shrank: so does the frame
+      g.deleteTexture(img.t);
+      img.t = g.createTexture(); img.h = CH;
+      g.activeTexture(g.TEXTURE0 + img.unit); g.bindTexture(g.TEXTURE_2D, img.t);
+      g.texStorage2D(g.TEXTURE_2D, 1, g.RGBA8, FW, CH);
+      g.texParameteri(g.TEXTURE_2D, g.TEXTURE_MIN_FILTER, g.NEAREST);
+      g.texParameteri(g.TEXTURE_2D, g.TEXTURE_MAG_FILTER, g.NEAREST);
+      g.bindFramebuffer(g.FRAMEBUFFER, fb);
+      g.framebufferTexture2D(g.FRAMEBUFFER, g.COLOR_ATTACHMENT0, g.TEXTURE_2D, img.t, 0);
+    };
+    const embers = program(...EMBERS), vao = g.createVertexArray(), vb = g.createBuffer();
+    g.bindVertexArray(vao); g.bindBuffer(g.ARRAY_BUFFER, vb);
+    g.bufferData(g.ARRAY_BUFFER, emb.byteLength, g.STREAM_DRAW);
+    const pa = g.getAttribLocation(embers, 'p'), ca = g.getAttribLocation(embers, 'c');
+    g.enableVertexAttribArray(pa); g.vertexAttribPointer(pa, 2, g.FLOAT, false, 20, 0);
+    g.enableVertexAttribArray(ca); g.vertexAttribPointer(ca, 3, g.FLOAT, false, 20, 8);
+    g.bindVertexArray(null);
+    const ship = program(VS, SHIP);
+    g.useProgram(ship);
+    g.uniform1i(g.getUniformLocation(ship, 'img'), img.unit);
+    g.blendFunc(g.ONE, g.ONE);
+    g.enable(g.SCISSOR_TEST);                    // only the rows on screen get painted
+    return { T, fb, wall, embers, vao, vb, ship, size,
+             solid: g.getUniformLocation(wall, 'solid'),
+             pan: g.getUniformLocation(wall, 'pan'), deep: g.getUniformLocation(wall, 'deep'),
+             ch: g.getUniformLocation(wall, 'CH'), t: g.getUniformLocation(wall, 't'),
+             ech: g.getUniformLocation(embers, 'ch'),
+             impact: g.getUniformLocation(ship, 'impact') };
+  }
+  function up(T, data, y0 = 0) {                 // rows y0.. of a texture, from the same rows of data
+    ctx.activeTexture(ctx.TEXTURE0 + T.unit);
+    ctx.texSubImage2D(ctx.TEXTURE_2D, 0, 0, y0, T.w, T.h - y0, T.fmt, T.type, data,
+                      y0 * T.w * (T.fmt === ctx.RGBA_INTEGER ? 4 : T.fmt === ctx.RG_INTEGER ? 2 : 1));
+  }
+  /* the glass lost: the h1 carries the name until it's back */
+  let lostT = 0;
+  const walled = on => {
+    document.documentElement.classList.toggle('walled', on);
+    cv.style.visibility = on ? '' : 'hidden';
+  };
+  cv.addEventListener('webglcontextlost', e => {
+    e.preventDefault(); glass = null;
+    lostT = setTimeout(() => walled(false), 1000);
+  });
+  cv.addEventListener('webglcontextrestored', () => {
+    clearTimeout(lostT);
+    try { glass = makeGlass(); } catch (e) { console.warn(e); }
+    walled(!!glass);
+  });
+
+  function paint(now) {
+    const g = ctx, G = glass, T = G.T;
+    for (let x = 0; x < FW; x++) {
+      const k = 4 * x, w = 4 * (FW + x);
+      colPk[k] = cb[x]; colPk[k + 1] = colVi[x]; colPk[k + 2] = topCol[x]; colPk[k + 3] = colTint[x];
+      colPk[w] = wDim[x]; colPk[w + 1] = wTop[x];
+    }
+    for (let y = 0; y < FH; y++) { rowPk[2 * y] = rowDx[y] + 128; rowPk[2 * y + 1] = rowBoost[y]; }
+    const r = cv.getBoundingClientRect(), k = CH / r.height;
+    const b0 = Math.max(0, Math.floor(-r.top * k) - 48),       // and a margin, so a fast
+          b1 = Math.min(CH, Math.ceil((innerHeight - r.top) * k) + 48);   // scroll finds them lit
+    if (b1 <= b0) return;
+    if (b0 < FH) {                               // the wall's in view: its layers go up
+      up(T.heat, cur); up(T.app, appB); up(T.flr, floorB, HOR);
+      if (glUp) { up(T.glyph, glyph); glUp = false; }
+      up(T.col, colPk); up(T.rows, rowPk);
+      if (shUp) { up(T.shat, shD); shUp = false; }
+      if (wxUp) { up(T.wx, wx); wxUp = false; }
+    }
+    g.viewport(0, 0, FW, CH); g.scissor(0, CH - b1, FW, b1 - b0);
+    g.bindFramebuffer(g.FRAMEBUFFER, G.fb);
+    g.useProgram(G.wall); g.uniform1i(G.solid, Math.round(solidA * 256));
+    g.uniform1i(G.pan, panW); g.uniform1i(G.deep, panB - panW);
+    g.uniform1i(G.ch, CH); g.uniform1f(G.t, still ? 0 : (now % 3.6e6) / 1000);
+    g.drawArrays(g.TRIANGLES, 0, 3);             // the wall
+    emberPass(now);
+    if (nEmb) {
+      g.useProgram(G.embers); g.uniform1f(G.ech, CH);
+      g.bindVertexArray(G.vao); g.bindBuffer(g.ARRAY_BUFFER, G.vb);
+      g.bufferSubData(g.ARRAY_BUFFER, 0, emb, 0, nEmb * 5);
+      g.enable(g.BLEND); g.drawArrays(g.POINTS, 0, nEmb); g.disable(g.BLEND);
+      g.bindVertexArray(null);
+    }
+    g.bindFramebuffer(g.FRAMEBUFFER, null);
+    g.useProgram(G.ship);
+    g.uniform1i(G.impact, impact);
+    g.drawArrays(g.TRIANGLES, 0, 3);
+  }
+
   let simT = 0, simTick = 0, prevNow = 0, drawSkip = 0, pend = 0;
-  let emaBlit = 2, needCool = false;           // what a paint costs; a wound waiting
-  const PMASK = (60 / PAINT_HZ | 0) - 1;       // worked steps per paint, as a mask
+  let needSurvey = false;                      // a remeasure waiting
   let blurred = !document.hasFocus();          // an unwatched wall burns low
-  addEventListener('blur',  () => { blurred = true; });
-  addEventListener('focus', () => { blurred = false; });
-  let liveUntil = 0;                           // hands at the wall: full cadence
+  let liveUntil = 0;                           // something happening: full cadence, even unwatched
+  let panW = 0, panB = 0;                      // the lags, in whole rows, as last painted
   function lively(ms) {
-    const t = performance.now() + (ms || 1200);
+    const t = performance.now() + ms;
     if (t > liveUntil) liveUntil = t;
   }
 
   /* the gauge: a small honest meter for when the wall feels heavy.
-     add ?hud to the url — or deck.wall.hud(true) from the console. */
-  let hudOn = typeof location === 'object' && /[?&#]hud\b/.test(location.search + location.hash);
+     add ?hud to the url. draw is the CPU side of a paint; the GPU's own
+     time doesn't show here. */
+  const hudOn = /[?&#]hud\b/.test(location.search + location.hash);
   let hudEl = null;
-  const hAcc = { raf: 0, paint: 0, sim: 0, blit: 0, worst: 0, t0: 0 };
-  function hudTick(now, simMs, blitMs, painted) {
+  const hAcc = { raf: 0, paint: 0, sim: 0, draw: 0, worst: 0, t0: 0 };
+  function hudTick(now, simMs, drawMs, painted) {
     hAcc.raf++; if (painted) hAcc.paint++;
-    hAcc.sim += simMs; hAcc.blit += blitMs;
-    const f = simMs + blitMs; if (f > hAcc.worst) hAcc.worst = f;
+    hAcc.sim += simMs; hAcc.draw += drawMs;
+    const f = simMs + drawMs; if (f > hAcc.worst) hAcc.worst = f;
     if (!hAcc.t0) { hAcc.t0 = now; return; }
     if (now - hAcc.t0 < 500) return;
     if (!hudEl) {
       hudEl = document.createElement('div');
       hudEl.style.cssText = 'position:fixed;right:8px;bottom:6px;z-index:99;' +
-        'color:#2af5e6;background:rgba(0,0,0,.55);padding:2px 8px;' +
+        'color:#6fe3d6;background:rgba(4,7,11,.55);padding:2px 8px;' +
         'font:11px/1.6 monospace;pointer-events:none;white-space:pre';
       document.body.appendChild(hudEl);
     }
@@ -889,9 +1178,9 @@
       'raf '    + (hAcc.raf / s).toFixed(0) + '/s' +
       '  paint ' + (hAcc.paint / s).toFixed(0) + '/s' +
       '  sim '   + (hAcc.sim / Math.max(1, hAcc.raf)).toFixed(2) + 'ms' +
-      '  blit '  + (hAcc.blit / Math.max(1, hAcc.paint)).toFixed(2) + 'ms' +
+      '  draw '  + (hAcc.draw / Math.max(1, hAcc.paint)).toFixed(2) + 'ms' +
       '  worst ' + hAcc.worst.toFixed(1) + 'ms';
-    hAcc.raf = hAcc.paint = hAcc.sim = hAcc.blit = hAcc.worst = 0; hAcc.t0 = now;
+    hAcc.raf = hAcc.paint = hAcc.sim = hAcc.draw = hAcc.worst = 0; hAcc.t0 = now;
   }
   function frame(now) {
     const tA = hudOn ? performance.now() : 0;
@@ -907,25 +1196,27 @@
       simTick++;
       if (still && (simTick & 3) !== 0) continue;
       work++;
-      if ((simTick & 3) === 0 || needCool || tears.length) { rebuildCool(now); needCool = false; }
+      if ((simTick & 3) === 0 || needSurvey) { survey(now); needSurvey = false; }
       att.x += (att.tx - att.x) * .045;            // the gaze drifts, never snaps
       att.y += (att.ty - att.y) * .045;
       if (!still) {
-        flow += mode === 'working' ? .85 : .5;     // the curtain falls
+        if (!linkPh) flow += mode === 'working' ? .85 : .5;   // the curtain falls
         if (flow > 1e7) flow -= 8388608;           // wraps clean mod 256
       }
-      fade();
-      let t = cur; cur = nxt; nxt = t;
-      t = cur32; cur32 = nxt32; nxt32 = t;
-      advanceStreams(cur);
-      advanceRisers(cur);
+      if (!linkPh) {                               // linked, the wall stands still
+        fade();
+        let t = cur; cur = nxt; nxt = t;
+        t = cur32; cur32 = nxt32; nxt32 = t;
+        advanceStreams();
+        advanceRisers();
+      }
       if (now < gatherUntil)                       // motes stirring before speech
         for (let k = 0; k < 14; k++) {
           const a = rnd() * Math.PI * 2, rr = rnd() * 38;
           const x = gx + Math.cos(a) * rr | 0, y = gy + Math.sin(a) * rr * .6 | 0;
           if (x < 0 || x >= FW || y < 0 || y >= FH) continue;
           const i = y * FW + x;
-          if (!hard[i]) { const v = 3 + ((rnd() * 6) | 0); if (v > cur[i]) cur[i] = v; }
+          const v = 3 + ((rnd() * 6) | 0); if (v > cur[i]) cur[i] = v;
         }
     }
 
@@ -957,17 +1248,17 @@
       if (pulseAt <= 0) { pulseT0 = now; pulseAt = 7000 + rnd() * 9000; }
     }
 
-    /* the brush is metered: the blit is the last big cost, so paint at
-       PAINT_HZ against the 60 Hz walk — every 4th step when blurred,
-       reduced motion at its native 15. but hands on the wall get the full
-       cadence: while you touch it, tear it, or it speaks, every step
-       paints. counted in steps, not frames, so a battery-throttled rAF
-       isn't halved twice. the sim never skips — no pace is lost, only paint. */
+    /* the brush: every step paints, the sim's own 60 Hz; reduced motion
+       at its native 15. an unwatched wall burns low, every 4th step,
+       unless something is happening on it. counted in steps, not frames,
+       so a battery-throttled rAF isn't halved twice. the sim never skips —
+       no pace is lost, only paint. */
     pend += work;
-    const mask = now < liveUntil && emaBlit < 4.5  // full cadence only if the
-      ? 0                                          // iron can afford the brush
-      : blurred ? PMASK | 3 : still ? 0 : PMASK;
-    if (!work || (mask && (drawSkip = (drawSkip + work) & mask) !== 0)) {
+    const mask = blurred && now >= liveUntil ? 3 : 0;
+    const pw = Math.round(lag(KW)), pb = Math.round(lag(KB));
+    const panned = pw !== panW || pb !== panB;   // the view moved: paint it now, step or not
+    panW = pw; panB = pb;
+    if (!panned && (!work || (mask && (drawSkip = (drawSkip + work) & mask) !== 0))) {
       if (hudOn) hudTick(now, performance.now() - tA, 0, false);
       requestAnimationFrame(frame); return;
     }
@@ -995,9 +1286,16 @@
         if (sl.boost > rowBoost[y]) rowBoost[y] = sl.boost;
       }
     }
+    huntA = hunting ? Math.min(1, (now - huntT0) / 600) : 0;
+    if (snapFlash) {                               // the freeze: one bright frame
+      snapFlash = false;
+      for (let y = 0; y < FH; y++) rowBoost[y] += 4;
+    }
+    buildShatters(now);
+
     /* the ink is in the wall, so the wall takes the ink with it when it
-       rips: a slice crossing a line's rows yanks that line sideways too —
-       and the tear corrupts the words it crosses (the colloquy listens) */
+       rips: a wild slice (a click, a bite) crossing a line's rows yanks it sideways too —
+       and the tear corrupts the words it crosses */
     for (const I of inks) {
       if (I.wy1 < I.wy0) continue;
       let dj = 0;
@@ -1005,113 +1303,34 @@
         if (rowWild[y] && Math.abs(rowDx[y]) > Math.abs(dj)) dj = rowDx[y];
       const j = dj ? Math.max(-14, Math.min(14, dj * 1.2)) | 0 : 0;
       if (j !== I.jolt) {
-        if (j && !I.jolt && window.deck && deck.tearstruck) deck.tearstruck(I.el);
+        if (j && !I.jolt) deck.tearstruck(I.el);
         I.jolt = j; I.el.style.translate = j ? j + 'px' : '';
       }
     }
 
-    dressColumns(); dustFrame(now, pend); watcherFrame(pend); pend = 0;
-    pressApparitions(now);           // the others move on the paint clock now
+    linkFrame(dt); dressColumns(); dustFrame(now, pend); watcherFrame(pend); pend = 0;
+    pressApparitions(now);           // the others move on the paint clock
+    stampTexts(now);
 
-    /* the blit: curtain × weather, the others pressing through, the heat
-       layer burning over everything. torn rows wrap around; boosts skip
-       the voids so tears stay black. */
-    for (let y = 0; y < FH; y++) {
-      const row = y * FW, off = rowDx[y], bst = rowBoost[y];
-      const pb = (y & 1) ? PB : 0;                   // raster rows take the dim bank
-      if (y < HOR) {
-        for (let x = 0; x < FW; x++) {
-          let sx = x - off; sx = sx < 0 ? sx + FW : sx >= FW ? sx - FW : sx;
-          const si = row + sx;
-          let c8 = 0, ap = 0;
-          if (y >= topCol[sx]) {
-            const vm = vmod[(y + colVi[sx]) & 255];
-            const sb = (cb[sx] * vm) >> 8;
-            c8 = (sb * aurB[si]) >> 7;
-            const ab = appB[si];
-            if (ab) ap = (ab * (96 + (vm >> 1))) >> 8;   // their own light,
-          }                                              // striped by the weave
-          const cm = calm[row + x];
-          if (cm) {                                  // ink clears its ground —
-            c8 = (c8 * (270 - cm)) >> 8;             // but the others only
-            if (ap) ap = (ap * (270 - (cm >> 1))) >> 8;   // half-respect it
-          }
-          c8 += ap; if (c8 > 255) c8 = 255;
-          const vg = VIG[row + x];                   // the glass, baked in
-          c8 = (c8 * vg) >> 8;
-          const v = (cur[si] * vg) >> 8;
-          let hue = 0, lvl;
-          if (hard[si]) {
-            const ab = appB[si];
-            if (ab > 70) {           // through the wound: one of them, raw
-              hue = 7; lvl = ((20 + (ab >> 4)) * vg) >> 8; if (lvl > MAX) lvl = MAX;
-              if (v > lvl) { hue = 0; lvl = v; }
-            } else lvl = v;
-            if (cm) lvl = (lvl * (270 - cm)) >> 8;   // the clearing holds
-          } else {
-            const cl = CL[c8];
-            if (v >= cl) lvl = v;
-            else { lvl = cl; hue = hueIx[si]; }
-            if (bst) { lvl += bst; if (lvl > MAX) lvl = MAX; }
-          }
-          px32[row + x] = PAL[pb + hue * 37 + lvl];
-        }
-      } else {
-        const dy = y - HOR;
-        for (let x = 0; x < FW; x++) {
-          let sx = x - off; sx = sx < 0 ? sx + FW : sx >= FW ? sx - FW : sx;
-          const si = row + sx;
-          let c8;
-          if (dy < 2) c8 = (cb[sx] * 340) >> 8;      // the hot seam at its foot
-          else if (dy < 16) c8 = (((cb[sx] * reflF[dy]) >> 8) * vmod[(y + colVi[sx]) & 255]) >> 8;
-          else c8 = 0;
-          const fb = floorB[si];
-          if (fb > c8) c8 = fb;
-          c8 = (c8 * aurB[si]) >> 7;
-          if (c8 > 255) c8 = 255;
-          if (dy < 6 && wDim[sx] < 255 && dy >= wTop[sx])
-            c8 = (c8 * wDim[sx]) >> 8;               // a watcher, against the light
-          const cm = calm[row + x];
-          if (cm) c8 = (c8 * (270 - cm)) >> 8;
-          const vg = VIG[row + x];                   // the glass, baked in
-          c8 = (c8 * vg) >> 8;
-          const v = (cur[si] * vg) >> 8;
-          let hue = 0, lvl;
-          if (hard[si]) { lvl = v; if (cm) lvl = (lvl * (270 - cm)) >> 8; }
-          else {
-            const cl = CL[c8];
-            if (v >= cl) lvl = v;
-            else { lvl = cl; hue = hueIx[si]; }
-            if (bst) { lvl += bst; if (lvl > MAX) lvl = MAX; }
-          }
-          px32[row + x] = PAL[pb + hue * 37 + lvl];
-        }
-      }
-    }
-    emberPass(now);
-    ctx.putImageData(img, 0, 0);
-    const tC = performance.now();
-    emaBlit += (tC - tB - emaBlit) * .06;        // the wall learns what it costs
-    if (hudOn) hudTick(now, tB - tA, tC - tB, true);
+    if (glass) {
+      paint(now);
+      if (hudOn) hudTick(now, tB - tA, performance.now() - tB, true);
+    } else if (hudOn) hudTick(now, performance.now() - tA, 0, false);
     requestAnimationFrame(frame);
   }
 
   function tear(bx, by) {
-    tears.push({ cx: bx, cy: by, r: 13 + rnd() * 8,
-                 t0: performance.now(), dur: 1900 + rnd() * 500 });
-    if (!still)                      // a tear glitches the rows around it
+    shatter(bx, by, 18 + rnd() * 6, 160 + rnd() * 40);
+    if (!still)                      // and it jerks the rows around it
       for (let k = 0; k < 3; k++) spawnSlice(by, performance.now());
-    needCool = true;                 // the void opens on the very next step
-    lively(2400);
   }
 
   /* ── embers off the burning places ──
-     they used to ride a full-screen canvas of their own; on this iron every
-     compositor layer is dear, so now they are wall pixels — additive motes
-     poured into the frame just before it ships. */
+     wall pixels, not a layer of their own: additive motes poured onto the
+     woven wall, under the impact. */
   const sparks = [];
   let lastNow = 0, spawnAcc = 0;
-  const EMB_C = [[255, 60, 40], [255, 210, 200], [186, 120, 255]];  // blood, white-hot, a cold one
+  const EMB_C = [[42, 169, 168], [180, 242, 232], [154, 166, 255]];  // teal, white-teal, periwinkle
 
   function spawnEmber(px, py) {      // screen px when handed a place; ambient otherwise
     let x, y, vx, vy;
@@ -1136,10 +1355,10 @@
     sparks.push({ x, y, vx, vy, life: 0, max: 1400 + rnd() * 1700,
                   c: rnd() < .20 ? 1 : rnd() < .125 ? 2 : 0 });
   }
-  function emberBurst(x, y) { for (let i = 0; i < 12; i++) spawnEmber(x, y); }
 
-  function emberPass(now) {          // into px32, after the blit, before the ship
+  function emberPass(now) {          // what each adds where it is, for the glass
     const dt = Math.min(64, now - lastNow || 16); lastNow = now;
+    nEmb = 0;
     spawnAcc += dt * (mode === 'working' ? .010 : .0042) * (still ? .25 : 1);
     while (spawnAcc > 1) { spawnAcc -= 1; spawnEmber(); }
     for (let i = sparks.length - 1; i >= 0; i--) {
@@ -1147,74 +1366,387 @@
       s.life += dt;
       if (s.life >= s.max) { sparks.splice(i, 1); continue; }
       s.x += s.vx * dt * .06; s.y += s.vy * dt * .06;
-      const x = s.x | 0, y = s.y | 0;
+      const x = s.x | 0;
+      let y = s.y | 0;
       if (x < 0 || x >= FW || y < 0 || y >= FH) continue;
+      if (y < HOR && (y += panW) >= HOR) continue;       // off the wall, it sinks with it
+
       const a = ((1 - s.life / s.max) * (140 + 115 * rnd())) | 0;   // its breath
-      const c = EMB_C[s.c], j = y * FW + x, d = px32[j];
-      let r = (d & 255)         + ((c[0] * a) >> 8); if (r > 255) r = 255;
-      let g = ((d >> 8) & 255)  + ((c[1] * a) >> 8); if (g > 255) g = 255;
-      let b = ((d >> 16) & 255) + ((c[2] * a) >> 8); if (b > 255) b = 255;
-      px32[j] = (255 << 24) | (b << 16) | (g << 8) | r;
+      const c = EMB_C[s.c], k = 5 * nEmb;
+      if (k >= emb.length) continue;
+      emb[k] = x; emb[k + 1] = y;
+      emb[k + 2] = (c[0] * a) >> 8; emb[k + 3] = (c[1] * a) >> 8; emb[k + 4] = (c[2] * a) >> 8;
+      nEmb++;
     }
   }
 
+  /* ── writing on the wall ──
+     text made of the wall's own light: a 5×7 face stamped into a glyph
+     layer the glass folds in with the curtain. it takes the weave's
+     striation, flickers with the rest, shears when the rows tear, is eaten
+     by the others, and melts back into the rain when it's done. */
+  const FONT = {};
+  for (const [ch, rows] of Object.entries({
+    '0': '01110 10001 10011 10101 11001 10001 01110', '1': '00100 01100 00100 00100 00100 00100 01110',
+    '2': '01110 10001 00001 00010 00100 01000 11111', '3': '11111 00010 00100 00010 00001 10001 01110',
+    '4': '00010 00110 01010 10010 11111 00010 00010', '5': '11111 10000 11110 00001 00001 10001 01110',
+    '6': '00110 01000 10000 11110 10001 10001 01110', '7': '11111 00001 00010 00100 01000 01000 01000',
+    '8': '01110 10001 10001 01110 10001 10001 01110', '9': '01110 10001 10001 01111 00001 00010 01100',
+    'A': '01110 10001 10001 10001 11111 10001 10001', 'B': '11110 10001 10001 11110 10001 10001 11110',
+    'C': '01110 10001 10000 10000 10000 10001 01110', 'D': '11100 10010 10001 10001 10001 10010 11100',
+    'E': '11111 10000 10000 11110 10000 10000 11111', 'F': '11111 10000 10000 11110 10000 10000 10000',
+    'G': '01110 10001 10000 10111 10001 10001 01111', 'H': '10001 10001 10001 11111 10001 10001 10001',
+    'I': '01110 00100 00100 00100 00100 00100 01110', 'J': '00111 00010 00010 00010 00010 10010 01100',
+    'K': '10001 10010 10100 11000 10100 10010 10001', 'L': '10000 10000 10000 10000 10000 10000 11111',
+    'M': '10001 11011 10101 10101 10001 10001 10001', 'N': '10001 10001 11001 10101 10011 10001 10001',
+    'O': '01110 10001 10001 10001 10001 10001 01110', 'P': '11110 10001 10001 11110 10000 10000 10000',
+    'Q': '01110 10001 10001 10001 10101 10010 01101', 'R': '11110 10001 10001 11110 10100 10010 10001',
+    'S': '01111 10000 10000 01110 00001 00001 11110', 'T': '11111 00100 00100 00100 00100 00100 00100',
+    'U': '10001 10001 10001 10001 10001 10001 01110', 'V': '10001 10001 10001 10001 10001 01010 00100',
+    'W': '10001 10001 10001 10101 10101 10101 01010', 'X': '10001 10001 01010 00100 01010 10001 10001',
+    'Y': '10001 10001 10001 01010 00100 00100 00100', 'Z': '11111 00001 00010 00100 01000 10000 11111',
+    ':': '00000 01100 01100 00000 01100 01100 00000', '.': '00000 00000 00000 00000 00000 01100 01100',
+    '-': '00000 00000 00000 11111 00000 00000 00000', '_': '00000 00000 00000 00000 00000 00000 11111',
+    '[': '01110 01000 01000 01000 01000 01000 01110', ']': '01110 00010 00010 00010 00010 00010 01110',
+    '>': '01000 00100 00010 00001 00010 00100 01000', '/': '00000 00001 00010 00100 01000 10000 00000',
+    '+': '00000 00100 00100 11111 00100 00100 00000', '*': '00000 00100 10101 01110 10101 00100 00000',
+    '~': '00000 00000 01000 10101 00010 00000 00000', '!': '00100 00100 00100 00100 00100 00000 00100',
+    '?': '01110 10001 00001 00010 00100 00000 00100',
+  })) FONT[ch] = rows.replace(/ /g, '');
+  const CELL = 6;                    // a glyph is 5 wide, one pixel of air
+
+  const glyph = new Uint8Array(3 * N);   // three planes: level, hue, and the scorch —
+  const gl = glyph.subarray(0, N), gh = glyph.subarray(N, 2 * N),   // a dark pixel of
+        gs = glyph.subarray(2 * N);                                  // halo round each letter
+  const texts = new Map();           // id → { s, x, y, lvl, n?, lv?[], hu?[], sx?, sy? }
+  let glDirty = false, glUp = false;
+  function rasterize(t, put) {       // every lit pixel of a text, in wall px; a font pixel is sx×sy
+    const s = t.s.toUpperCase(), n = Math.min(t.n ?? s.length, s.length);
+    const sx = t.sx || 1, sy = t.sy || 1;
+    for (let i = 0; i < n; i++) {
+      const lv = t.lv ? t.lv[i] : t.lvl, hu = t.hu ? t.hu[i] : 0;
+      if (!lv) continue;
+      const gx = t.x + i * CELL * sx;
+      glyphPx(s[i], 0, 0, (kx, ky) => {
+        const x0 = gx + kx * sx, y0 = t.y + ky * sy;
+        for (let y = y0; y < y0 + sy; y++)
+          for (let x = x0; x < x0 + sx; x++)
+            if (x >= 0 && x < FW && y >= 0 && y < HOR) put(x, y, lv, hu);
+      });
+    }
+  }
+  function stampPx(x, y, lv, hu, halo) {
+    if (halo)                                            // burned in, not laid over
+      for (let yy = y - 1; yy <= y + 1; yy++)
+        if (yy >= 0 && yy < HOR) gs.fill(1, yy * FW + Math.max(0, x - 1), yy * FW + Math.min(FW, x + 2));
+    const vm = vmod[(y + colVi[x]) & 255];               // the weave runs through the letters
+    let v = ((lv * (150 + (vm >> 1))) >> 8) - ((rnd() * 3) | 0);
+    if (v <= 0) return;
+    if (v > MAX) v = MAX;
+    const i = y * FW + x;
+    if (v > gl[i]) { gl[i] = v; gh[i] = hu; }
+  }
+  function stampTexts(now) {
+    if (!texts.size && !flock.length) { if (glDirty) { gl.fill(0); gs.fill(0); glDirty = false; glUp = true; } return; }
+    gl.fill(0); gs.fill(0); glDirty = glUp = true;
+    for (const t of texts.values()) {
+      rasterize(t, (x, y, lv, hu) => stampPx(x, y, lv, hu, true));
+    }
+    if (flock.length) flockFrame(now);
+  }
+
+  /* ── the answer ──
+     they eat: each locks a bent line onto a code (row first or column
+     first), the code corrupts, and is pulled up the line into it, and the
+     wall shatters where it was; nearest first, several lines out at once.
+     when the last is inside the wall freezes, and they link: a repo each,
+     hopping through it, packets shuttling between them. then they take
+     their places round the name and link one last time, and hold. a flash,
+     and it's another generation of the wall, later; they're back beyond
+     it, a glow somewhere that fades, and the name accrues out of the rain,
+     one drop at a time. */
+  let flock = [], flockDone = null, nameT = null;
+  let shutAt = 0, shuttles = [], trail = [], linkPk = [], pkAt = 0, impT0 = 0, restT0 = 0, gone = false, faintT = -1e9;
+  let impact = 0, namePx = null;
+  const ping = apps.map(() => -1e9);
+  const LINKS = [[1, 2], [2, 0], [0, 1]], LINK = 2600;
+  const GLYPHS = Object.keys(FONT);
+  function glyphPx(ch, x, y, fn) {
+    const g = FONT[ch]; if (!g) return;
+    for (let k = 0; k < 35; k++) if (g.charCodeAt(k) === 49) fn(x + k % 5, y + (k / 5 | 0));
+  }
+  function lpt(x0, y0, x1, y1, hx, u) {              // the point u px along the line: straight (hx null),
+                                                      // or bent, row first (hx) or column first
+    if (hx === null) {
+      const L = Math.hypot(x1 - x0, y1 - y0), f = L ? Math.min(1, u / L) : 1;
+      return [x0 + (x1 - x0) * f, y0 + (y1 - y0) * f];
+    }
+    const L1 = hx ? Math.abs(x1 - x0) : Math.abs(y1 - y0);
+    if (u <= L1) {
+      const f = L1 ? u / L1 : 1;
+      return hx ? [x0 + (x1 - x0) * f, y0] : [x0, y0 + (y1 - y0) * f];
+    }
+    const L2 = hx ? Math.abs(y1 - y0) : Math.abs(x1 - x0), f = L2 ? Math.min(1, (u - L1) / L2) : 1;
+    return hx ? [x1, y0 + (y1 - y0) * f] : [x0 + (x1 - x0) * f, y1];
+  }
+  function dot(x, y, lv, hu, halo) {
+    x |= 0; y |= 0;
+    if (x >= 0 && x < FW && y >= 0 && y < HOR) stampPx(x, y, lv, hu, halo);
+  }
+  function head(x, y) {                               // a packet's hot 2×2 head
+    dot(x, y, 36, 7, false); dot(x + 1, y, 36, 7, false); dot(x, y + 1, 36, 7, false); dot(x + 1, y + 1, 36, 7, false);
+  }
+  function drawPacket(at, u) {                        // the head and a short hard tail, u px along at
+    head(...at(u));
+    for (let tr = 1; tr < 4; tr++) { const [x, y] = at(Math.max(0, u - tr * 2)); dot(x, y, 26 - tr * 5, 7, false); }
+  }
+  const ends = (a, b) => [appC[a][0] | 0, appC[a][1] | 0, appC[b][0] | 0, appC[b][1] | 0];
+
+  function migrate(ids, t) {
+    /* the codes: every run of glyphs between spaces is one bite */
+    const units = [];
+    for (const id of ids) {
+      const s = texts.get(id); if (!s) continue;
+      texts.delete(id);
+      const str = s.s.toUpperCase(), n = Math.min(s.n ?? str.length, str.length);
+      let u = null;
+      for (let i = 0; i < n; i++) {
+        const ch = str[i], lv = s.lv ? s.lv[i] : s.lvl, hu = s.hu ? s.hu[i] : 0;
+        if (!FONT[ch] || !lv) { u = null; continue; }
+        if (!u) units.push(u = { ch: [], y: s.y, px: 0 });
+        u.ch.push({ ch, x: s.x + i * CELL, lv, hu });
+        glyphPx(ch, 0, 0, () => u.px++);
+      }
+    }
+    nameT = { ...t, x: Math.round(t.x), y: Math.round(t.y) };
+    if (!units.length) { huntEnd(); return Promise.resolve(); }
+    const now = performance.now();
+
+    const per = apps.map(() => 0), queue = apps.map(() => []);
+    for (const u of units) {
+      u.cx = (u.ch[0].x + u.ch[u.ch.length - 1].x + 5) / 2; u.cy = u.y + 3;
+      let k = 0, best = 1e9;
+      for (let q = 0; q < apps.length; q++) {
+        const d = Math.hypot(appC[q][0] - u.cx, appC[q][1] - u.cy) * (.6 + rnd() * .9) / apps[q].sc;
+        if (d < best) { best = d; k = q; }
+      }
+      u.k = k; per[k] += u.px; queue[k].push(u);
+    }
+    const most = Math.max(...queue.map(q => q.length));
+    const gap = Math.max(40, Math.min(110, 1000 / most));
+    queue.forEach((q, k) => {
+      q.sort((a, b) => Math.hypot(appC[k][0] - a.cx, appC[k][1] - a.cy) -
+                       Math.hypot(appC[k][0] - b.cx, appC[k][1] - b.cy));
+      q.forEach((u, j) => { u.tl = now + 200 + k * 60 + j * gap * (.8 + rnd() * .4); u.hx = rnd() < .5; u.ph = 0; });
+    });
+    flock = units; flock.per = per;
+    linkPh = 0; impT0 = restT0 = 0; shuttles = []; charge.hold = 0;
+    lively(9000);
+    return new Promise(res => { flockDone = res; });
+  }
+
+  const EXT = 70, BITE = 80, PULL = .8;               // line out, corruption, px/ms home
+  function line(ax, ay, bx, by, hx, reach, lv) {
+    for (let d = 0; d < reach; d++) { const [x, y] = lpt(ax, ay, bx, by, hx, d); dot(x, y, lv, 7, false); }
+  }
+  function linkLines(lv) {                            // all three, whole
+    for (const [a, b] of LINKS) {
+      const [ax, ay, bx, by] = ends(a, b);
+      line(ax, ay, bx, by, null, Math.hypot(bx - ax, by - ay), lv);
+    }
+  }
+  function flockFrame(now) {
+    let eating = 0;
+    const taken = apps.map(() => 0);
+    for (const u of flock) {                             /* act two: they eat */
+      if (u.ph === 3) { taken[u.k] += u.px; continue; }
+      eating++;
+      const ex = appC[u.k][0] | 0, ey = appC[u.k][1] | 0;
+      if (now < u.tl) {                                  // still in the grid
+        for (const c of u.ch) glyphPx(c.ch, c.x, u.y, (x, y) => dot(x, y, c.lv, c.hu, true));
+        continue;
+      }
+      const L = Math.abs(u.cx - ex) + Math.abs(u.cy - ey);   // bent: the two legs
+      const f = now - u.tl;
+      if (f < EXT + BITE) {                              // locked: the line runs out, the code corrupts
+        line(ex, ey, u.cx, u.cy, u.hx, f < EXT ? L * f / EXT : L, 22);
+        const hot = f >= EXT;
+        for (const c of u.ch)
+          glyphPx(hot || rnd() < .3 ? GLYPHS[(rnd() * GLYPHS.length) | 0] : c.ch, c.x, u.y,
+                  (x, y) => dot(x, y, hot ? 33 : c.lv, hot ? 7 : c.hu, true));
+        continue;
+      }
+      if (!u.ph) {                                       // taken: the wall shatters where it was
+        u.ph = 1; u.dur = L / PULL; u.t0 = now;
+        shatter(u.cx, u.cy, 6 + (u.ch[u.ch.length - 1].x - u.ch[0].x) / 2 + rnd() * 3, 120 + rnd() * 40);
+        spawnSlice(u.cy, now);
+      }
+      const q = (now - u.t0) / u.dur;                  // pulled home; the line retracts behind it
+      if (q >= 1) { u.ph = 3; eating--; taken[u.k] += u.px; continue; }
+      const back = L * (1 - q);
+      line(ex, ey, u.cx, u.cy, u.hx, back, 22);
+      head(...lpt(ex, ey, u.cx, u.cy, u.hx, back));
+    }
+
+    if (!eating && !linkPh && !impT0) {                  /* act three: the wall freezes, they link */
+      huntEnd();
+      linkPh = 1; linkT0 = now; shutAt = now + 380;
+      for (const e of apps) e.st.next = now + 120 + rnd() * 200;
+    }
+    const f = now - linkT0;
+    if (linkPh === 1) {
+      if (now > shutAt && f < LINK - 200) {              // traffic between repos, quickening
+        const [a, b] = LINKS[(rnd() * 3) | 0], rev = rnd() < .5;
+        shuttles.push({ a: rev ? b : a, b: rev ? a : b, t0: now });
+        shutAt = now + Math.max(18, 110 - f * .05);
+      }
+      if (f >= LINK) { linkPh = 2; for (const e of apps) e.st.next = 0; }
+    }
+    for (let i = shuttles.length - 1; i >= 0; i--) {
+      const sh = shuttles[i];
+      const [ax, ay, bx, by] = ends(sh.a, sh.b), at = w => lpt(ax, ay, bx, by, null, w);
+      const L = Math.hypot(bx - ax, by - ay), q = (now - sh.t0) / (L / 1.1);
+      if (q >= 1) { ping[sh.b] = now; shuttles.splice(i, 1); continue; }
+      const u = q * L, [px] = at(u);
+      if (sh.lx == null || (px | 0) !== (sh.lx | 0)) {
+        if (sh.lx != null) {                             // the code under it, rewritten
+          wake(sh.lx, px, 4, 45);
+          for (let d = sh.lu; d < u; d += 3) { const [tx, ty] = at(d); trail.push({ x: tx | 0, y: ty | 0, t: now }); }
+        }
+        sh.lx = px; sh.lu = u;
+      }
+      drawPacket(at, u);
+    }
+    for (let i = trail.length - 1; i >= 0; i--) {         // a flash where it passed, going out
+      const T = trail[i], a = 1 - (now - T.t) / 90;
+      if (a <= 0 || !linkPh) { trail.splice(i, 1); continue; }
+      dot(T.x, T.y, (8 + 20 * a) | 0, T.h || 0, false);
+      dot(T.x, T.y + 1, (4 + 12 * a) | 0, T.h || 0, false);
+    }
+
+    /* the last link: in their places, all three at once, slower; then
+       nothing moves while it builds. then the impact, the wall restarts,
+       and the name comes out of it, slow. */
+    let done = false;
+    const g = f - LINK;
+    if (linkPh === 2 && !impT0) {
+      if (g > 300) {
+        /* the link is traffic: packets both ways down the paths, quickening
+           as it builds, until they pack into one solid line. */
+        const s0 = g - 300, hold = Math.max(0, (g - 500) / 600);
+        const solid = Math.pow(Math.max(0, (hold - .35) / .65), 1.5);
+        if (solid) linkLines((6 + 30 * solid) | 0);
+        if (s0 < 40) pkAt = now;
+        while (pkAt <= now) {
+          linkPk.push({ j: (rnd() * 3) | 0, rev: rnd() < .5, t0: pkAt, v: .5 + 1.6 * hold });
+          pkAt += Math.max(5, 65 * Math.pow(1 - hold, 1.6));
+        }
+        for (let i = linkPk.length - 1; i >= 0; i--) {
+          const P = linkPk[i], [a, b] = LINKS[P.j];
+          const [s, t] = P.rev ? [b, a] : [a, b];
+          const ax = appC[s][0], ay = appC[s][1], bx = appC[t][0], by = appC[t][1];
+          const L = Math.hypot(bx - ax, by - ay), u = (now - P.t0) * P.v;
+          if (u >= L) { ping[t] = now; linkPk.splice(i, 1); continue; }
+          drawPacket(w => lpt(ax, ay, bx, by, null, w), u);
+        }
+        if (s0 < 280) ping.fill(now);
+        charge.hold = 1 + hold * .5;
+        if (g >= 1100) { impT0 = now; lively(3000); }
+      }
+    }
+    if (impT0) {
+      const h = now - impT0;
+      impact = h < 60 ? 1 : 0;
+      if (h < 60) {                                        // the frame holds what it hit
+        linkLines(36);
+      } else if (!restT0) {                                // and it's another wall
+        restT0 = now; linkPh = 0; linkA = 0; gone = true; faintT = now;
+        shuttles = []; linkPk = []; charge.fill(0);
+        reseed();
+      }
+    }
+    if (restT0) {
+      /* the name, one drop at a time: every pixel of it keeps a little of
+         whatever light falls through it. nobody writes it; it accrues. */
+      if (!namePx) { namePx = []; rasterize({ ...nameT, lvl: 1 }, (x, y) => namePx.push({ x, y, a: 0 })); }
+      const dtn = Math.min(50, now - (namePx.t || now)); namePx.t = now;
+      let full = 0, sum = 0;
+      for (const q of namePx) {
+        sum += q.a;
+        if (q.a < 1) {
+          const i = q.y * FW + q.x, vm = vmod[(q.y + colVi[q.x]) & 255];
+          const drop = cur[i] > 6 ? cur[i] / 36 * .14 : 0;               // a drop passing leaves most
+          const weave = ((cb[q.x] * vm) >> 8) > 120 ? .007 : 0;        // the bright dash leaves some
+          q.a = Math.min(1, q.a + (drop + weave + .0022) * dtn / 16.7);
+        }
+        if (q.a >= 1) full++;
+        if (q.a > .02) stampPx(q.x, q.y, (q.a * 32) | 0, 0, q.a > .45);
+      }
+      nameT.onFill(sum / namePx.length);
+      if (full >= namePx.length * .985) done = true;
+    }
+    for (let k = 0; k < apps.length; k++) {
+      const held = impT0 ? 0 : charge.hold || (linkPh ? 1 : flock.per[k] ? taken[k] / flock.per[k] : 0);
+      charge[k] = held + 1.2 * Math.exp(-(now - ping[k]) / 110);
+    }
+    if (done) {
+      flock = []; shuttles = []; charge.fill(0); charge.hold = 0;
+      linkPh = 0; impT0 = restT0 = 0; gone = false; impact = 0; namePx = null;
+      const d = flockDone; flockDone = null;
+      if (d) d();
+    }
+  }
+
+  /* no glass, no wall: the page stands on its own */
+  measure();
+  try { if (ctx) glass = makeGlass(); } catch (e) { console.warn(e); }
+  if (!glass) {
+    ctx?.getExtension('WEBGL_lose_context')?.loseContext();
+    document.documentElement.classList.remove('walled', 'boot');
+    cv.remove();
+    return;
+  }
+  addEventListener('blur',  () => { blurred = true; });
+  addEventListener('focus', () => { blurred = false; });
+  addEventListener('resize', measure);
+  new ResizeObserver(measure).observe(cv);
+
+  /* the wall's verbs, for the page below */
   window.deck = window.deck || {};
   window.deck.wall = {
-    tear: (bx, by) => { tear(bx, by); emberBurst(bx / FW * innerWidth, by / FH * innerHeight); },
-    part: frac => {                  // old verbs are sacred — part() tears now
-      const bx = (frac ?? (.3 + rnd() * .4)) * FW;
-      const by = (.2 + rnd() * .6) * FH;
-      tear(bx, by); emberBurst(bx / FW * innerWidth, by / FH * innerHeight);
+    FW, FH, CELL,
+    tear,
+    write: (id, t) => {              // put words on the wall (wall px, top-left)
+      texts.set(id, { ...t, x: Math.round(t.x), y: Math.round(t.y) });
+      lively(800);
     },
-    glitch: (n = 4) => {             // rip a burst of scan tears, on demand
-      const t = performance.now();
-      for (let k = 0; k < n; k++) spawnSlice(null, t + rnd() * 160);
-      glitchStrip();
-      lively(900);
+    erase: id => { texts.delete(id); },
+    melt: id => {                    // the words go back into the rain
+      const t = texts.get(id); if (!t) return;
+      texts.delete(id);
+      const drip = .2 / Math.max(1, ((t.sx || 1) * (t.sy || 1)) / 3);
+      rasterize(t, (x, y, lv) => {
+        const i = y * FW + x;
+        if (lv > cur[i]) cur[i] = lv;
+        if (rnd() < drip) risers.push({ x, y, v: -(.35 + rnd() * 1.2), heat: lv,
+                                      gap: 0, life: 50 + ((rnd() * 90) | 0) });
+      });
+      lively(1600);
     },
-    summon: () => {                  // ask the tall one to come forward
-      flare.i = 0; flare.t0 = performance.now();
-      flare.at = performance.now() + 12000;
-      lively(2600);
-    },
-    rebuild: () => {},               // compat: measurement is live now (15 Hz)
+    migrate, hunt,
     screenToWall: s2w,
-    ink: setInks,                    // the colloquy registers its living lines
-    absorb: r => {                   // a spoken line, taken (screen-px rect)
-      absorbRect(r);
-      emberBurst((r.left + r.right) / 2, r.top);
-      lively(1800);
+    lag: () => lag(KW) * rowPx,      // css px the wall trails the page by
+    ink: setInks,                    // the page registers its living lines
+    absorb: absorbRect,              // a spoken line, taken (screen-px rect)
+    look: (px, py) => {              // the cursor passes; the wall looks there
+      const [x, y] = s2w(px, py);
+      if (y >= FH) return;           // down on the floor, past its sight
+      att.tx = x; att.ty = y;
+      att.hold = performance.now() + 2600;
+      lively(1400);
     },
-    touch: (px, py, heat = 15) => {  // a keystroke lands; the wall feels it
-      const p = s2w(px, py);
-      const x = p[0] | 0, y = p[1] | 0;
-      for (let dy = 0; dy < 3; dy++) for (let dx = 0; dx < 3; dx++) {
-        const xx = x + dx, yy = y + dy;
-        if (xx < 0 || xx >= FW || yy < 0 || yy >= FH) continue;
-        const i = yy * FW + xx;
-        const v = heat - dy * 2 - ((rnd() * 4) | 0);
-        if (!hard[i] && v > cur[i]) cur[i] = v;
-      }
-      attend(px, py, 2600);
-    },
-    attend: (px, py, ms) => attend(px, py, ms),
-    gather: (px, py, ms) => gather(px, py, ms),
-    apparition: (r, dur) => {        // something raised tears its own hole
-      const c = s2w((r.left + r.right) / 2, (r.top + r.bottom) / 2);
-      const rw = r.width / innerWidth * FW / 2, rh = r.height / innerHeight * FH / 2;
-      const rr = Math.max(rh * 1.5, rw * .75);
-      const t0 = performance.now();
-      tears.push({ cx: c[0] - rw * .45, cy: c[1], r: rr, t0, dur });
-      tears.push({ cx: c[0] + rw * .45, cy: c[1], r: rr, t0, dur });
-      emberBurst((r.left + r.right) / 2, (r.top + r.bottom) / 2);
-      needCool = true;
-      lively(dur + 500);
-    },
-    hud: on => {                     // the gauge, by hand
-      hudOn = on !== false;
-      if (!hudOn && hudEl) { hudEl.remove(); hudEl = null; }
-    },
-    set state(m) { mode = m; }, get state() { return mode; },
+    gather,
+    set state(m) { mode = m; },
   };
 
   weather(0); pressApparitions(0);   // the wall is already there when you arrive
@@ -1222,27 +1754,25 @@
 })();
 
   /* ── the homepage rides on the wall ──────────────────────────────────────
-     register every line as ink (the wall casts a readable clearing under it),
-     resolve the headings out of blood static, and let hands wound the wall:
-     the cursor throws sparks, a click tears a hole. the engine above does the
-     burning; this only wires you in. */
+     register the masthead as ink, resolve the headings out of static, and
+     let hands at the wall: it looks where the cursor is, a click shatters
+     it. the engine above does the burning; this only wires you in. */
   (function () {
+    if (!window.deck || !deck.wall) return;      // no wall: plain page
+    const W = deck.wall;
     const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    function collectInks() {
-      const els = [];
-      document.querySelectorAll('#page [data-clear]').forEach(el => els.push({ el }));
-      return els;
-    }
-    function syncInk() { if (window.deck && deck.wall) deck.wall.ink(collectInks()); }
+    function syncInk() { W.ink([...document.querySelectorAll('#page [data-clear]')]); }
 
     /* transmissions: text resolves out of static, left to right */
+    const pick = a => a[(Math.random() * a.length) | 0];
     const NOISE = '░▒▓█▚▞▙▟▛▜╬╪╫≡§Ø¤×#%&@';
-    const ng = () => NOISE[(Math.random() * NOISE.length) | 0];
+    const ng = () => pick(NOISE);
     const DECODE_MS = 55;             // ms each glyph takes to resolve — higher = slower
-    function decodeIn(el, delay) {
-      const text = el.textContent;
-      if (still || !text) return;
+    function decodeIn(el, delay, per = DECODE_MS) {
+      const text = el.dataset.text;
+      const gen = el._gen = (el._gen || 0) + 1;   // a newer decode or an eating cancels this one
+      if (still || !text) { el.textContent = text; return; }
       const res = document.createElement('span');
       const hot = document.createElement('span'); hot.className = 'hot';
       const raw = document.createElement('span'); raw.className = 'raw';
@@ -1250,8 +1780,8 @@
       el.append(res, hot, raw);
       const t0 = performance.now() + delay;
       (function step() {
-        if (!el.isConnected) return;
-        const k = Math.max(0, Math.min(text.length, ((performance.now() - t0) / DECODE_MS) | 0));
+        if (!el.isConnected || el._gen !== gen) return;
+        const k = Math.max(0, Math.min(text.length, ((performance.now() - t0) / per) | 0));
         if (k >= text.length) { el.textContent = text; return; }
         res.textContent = text.slice(0, k);
         const hn = Math.min(3, text.length - k);
@@ -1263,45 +1793,260 @@
       })();
     }
 
+    /* the same line, accrued alongside the name: each glyph comes up out of
+       nothing at its own point of the fill, raw → hot → resolved */
+    function accrue(el) {
+      const text = el.dataset.text, th = [...text].map(() => .06 + Math.random() * .8);
+      let spans = null;
+      return p => {
+        if (!spans) {
+          el.textContent = '';
+          spans = [...text].map(() => el.appendChild(document.createElement('span')));
+          el.style.visibility = 'visible';
+        }
+        spans.forEach((sp, i) => {
+          const ch = text[i], d = p - th[i];
+          const st = ch === ' ' || d >= 0 ? 'res' : d > -.07 ? 'hot' : d > -.22 ? 'raw' : '';
+          if (st === 'res') { if (sp.className || sp.textContent !== ch) { sp.className = ''; sp.textContent = ch; } }
+          else { sp.className = st || 'raw'; sp.textContent = st ? ng() : '\u00a0'; }
+        });
+      };
+    }
+
+    /* the rect of the words themselves, not the block they sit in */
+    function textRect(el) {
+      const r = document.createRange(); r.selectNodeContents(el);
+      return r.getBoundingClientRect();
+    }
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+    /* ── the breach ──
+       the wall shows its code matrix in its own light. a highlight walks
+       row, column, row, uploading the sequence into the buffer. the
+       others eat the code, link up, and link once more;
+       a flash, the wall is reseeded, and the name comes out of it. once
+       per visit; any key or click hurries it. */
+    const CODES = ['1C', 'BD', '55', 'E9', '7A', 'FF'];
+    let hurry = false;
+    const hurryUp = () => { hurry = true; };
+    const wait = ms => hurry ? null : sleep(ms);
+    const widthOf = s => s.length * W.CELL - 1;
+
+    async function typeIn(id, t, msPer) {
+      for (let n = 1; n < t.s.length && !hurry; n++) {
+        W.write(id, { ...t, n });
+        await sleep(msPer);
+      }
+      W.write(id, t);
+    }
+
+    let booting = false;
+    async function runBreach() {
+      booting = true;
+      W.state = 'working';                         // the wall runs hot while it's breached
+      addEventListener('keydown', hurryUp);
+      addEventListener('pointerdown', hurryUp);
+
+      const r = textRect(title), mx = (r.left + r.right) / 2, my = (r.top + r.bottom) / 2;
+      const [cx, cy] = W.screenToWall(mx, my);
+
+      /* the matrix, with a solvable path laid in: row 0 → its column → a row */
+      const seq = [pick(CODES), pick(CODES), pick(CODES)];
+      const grid = [...Array(5)].map(() => [...Array(5)].map(() => pick(CODES)));
+      const c0 = (Math.random() * 5) | 0, r1 = 1 + ((Math.random() * 4) | 0);
+      const c2 = (c0 + 1 + ((Math.random() * 4) | 0)) % 5;
+      const path = [[0, c0], [r1, c0], [r1, c2]];
+      path.forEach(([pr, pc], k) => { grid[pr][pc] = seq[k]; });
+      const picked = new Set(), buf = [];
+
+      const rowW = widthOf('1C  1C  1C  1C  1C');
+      const gx = cx - rowW / 2, gy = cy - 27;
+      const head = s => ({ s, x: cx - widthOf(s) / 2, y: gy - 17, lvl: 30 });
+
+      function drawGrid(active, at, flash) {
+        for (let gr = 0; gr < 5; gr++) {
+          const s = grid[gr].join('  '), lv = [], hu = [];
+          for (let gc = 0; gc < 5; gc++) {
+            const on = active && (active.row ? gr === active.i : gc === active.i);
+            let L = on ? 28 : 13, H = 0;
+            if (picked.has(gr * 5 + gc)) L = on ? 12 : 7;
+            if (at && at[0] === gr && at[1] === gc) { L = flash ? 36 : 31; H = flash ? 0 : 7; }
+            lv.push(L, L, 0, 0); hu.push(H, H, 0, 0);
+          }
+          W.write('g' + gr, { s, x: gx, y: gy + gr * 11, lv, hu });
+        }
+      }
+      function drawBuffer() {
+        const s = 'buffer ' + [0, 1, 2].map(k => buf[k] || '__').join('  ');
+        const lv = [...s].map((_, i) => i < 7 ? 16 : buf[((i - 7) / 4) | 0] ? 29 : 12);
+        const hu = [...s].map((_, i) => i < 7 ? 0 : 7);
+        W.write('buf', { s, x: gx, y: gy + 5 * 11 + 6, lv, hu });
+      }
+
+      await wait(450);                             // the wall first, alone
+      await typeIn('head', head('breach protocol'), 24);
+      for (let gr = 0; gr < 5; gr++) {             // the matrix surfaces row by row
+        drawGrid(null);
+        for (let k = gr + 1; k < 5; k++) W.erase('g' + k);
+        await wait(70);
+      }
+      drawGrid({ row: true, i: 0 });
+      drawBuffer();
+      await wait(380);
+
+      let active = { row: true, i: 0 };
+      for (let k = 0; k < 3; k++) {
+        const [pr, pc] = path[k];
+        const to = active.row ? pc : pr;
+        for (let j = 0; j <= to; j++) {            // the cursor walks the line
+          drawGrid(active, active.row ? [pr, j] : [j, pc]);
+          await wait(105);
+        }
+        await wait(170);
+        drawGrid(active, [pr, pc], true);
+        await wait(80);
+        buf[k] = grid[pr][pc];
+        grid[pr][pc] = '[]';
+        picked.add(pr * 5 + pc);
+        active = { row: !active.row, i: active.row ? pc : pr };
+        drawGrid(k < 2 ? active : null);
+        drawBuffer();
+        await wait(140);
+      }
+
+      W.write('head', { ...head('breached'), lvl: 34 });
+      await wait(420);
+      const ids = ['head', 'g0', 'g1', 'g2', 'g3', 'g4', 'buf'];
+      if (hurry) for (const id of ids) W.melt(id);
+      else {
+        const geo = nameGeom(), nw = widthOf(title.dataset.text) * geo.sx;
+        W.hunt(geo.x + nw / 2, nw / 2);
+        W.gather(mx, my, 3600);
+        await sleep(300);
+        await W.migrate(ids, { s: title.dataset.text, ...nameGeom(), onFill: accrue(tagline) });
+      }
+      settleName();
+      document.documentElement.classList.remove('boot');
+      tagline.style.visibility = '';
+      if (hurry) decodeIn(tagline, 200);
+      else tagline.textContent = tagline.dataset.text;
+      await wait(700);
+
+      W.state = 'idle';
+      removeEventListener('keydown', hurryUp);
+      removeEventListener('pointerdown', hurryUp);
+      try { sessionStorage.setItem('booted', '1'); } catch (e) {}
+      booting = false;
+      checkEat();
+    }
+
+    const title = document.getElementById('title');
+    const tagline = document.querySelector('.tagline');
+    const mast = [title, tagline];
+
+    /* the name is written in the wall's own face. the h1 keeps the place
+       and the words for readers that can't see light; the wall sets it,
+       square on any screen, as wide as the h1 would have been. */
+    const RAND = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let name = null, nameGen = 0;                  // what the wall says now, minus where
+    /* measured off the clean words, not the live h1: a tear boils its
+       glyphs into wider static and jolts it sideways */
+    const meter = document.createElement('canvas').getContext('2d');
+    function nameGeom() {
+      const s = title.dataset.text, cs = getComputedStyle(title), b = title.getBoundingClientRect();
+      meter.font = cs.font; meter.letterSpacing = cs.letterSpacing;
+      const w = meter.measureText(s).width, mx = (b.left + b.right) / 2 - (parseFloat(title.style.translate) || 0);
+      const [x0, y0] = W.screenToWall(mx - w / 2, b.top), [x1, y1] = W.screenToWall(mx + w / 2, b.bottom);
+      const cells = widthOf(s);
+      const sx = Math.max(1, Math.floor((x1 - x0) / cells));
+      const sy = Math.max(1, Math.round(sx * (y1 - y0) / b.height * w / (x1 - x0)));
+      return { sx, sy, x: Math.round((x0 + x1) / 2 - cells * sx / 2), y: Math.round((y0 + y1) / 2 - 7 * sy / 2) };
+    }
+    function placeName() {
+      if (name) W.write('name', { ...name, ...nameGeom() });
+    }
+    function settleName() { name = { s: title.dataset.text, lvl: 32 }; placeName(); }
+    async function speakName() {                   // resolved ← hot ← raw, like the rest
+      const s = title.dataset.text, gen = ++nameGen;
+      if (still) { settleName(); return; }
+      for (let f = 0; f <= s.length * 2 + 1; f++) {
+        if (gen !== nameGen) return;
+        const k = f >> 1;
+        let t = '';
+        const lv = [], hu = [];
+        for (let i = 0; i < s.length; i++) {
+          const res = i < k, hot = !res && i < k + 3;
+          t += res || s[i] === ' ' ? s[i] : pick(RAND);
+          lv.push(res ? 32 : hot ? 22 : 8);
+          hu.push(res || hot ? 0 : 7);
+        }
+        name = { s: t, lv, hu };
+        placeName();
+        await sleep(DECODE_MS * .6);
+      }
+      if (gen === nameGen) settleName();
+    }
+    function speakMasthead() {
+      speakName();
+      decodeIn(tagline, 60, 16);                   // done alongside the name, not long after it
+    }
+
+    /* ── scroll eats it ──
+       walk further in and the wall takes the masthead: the name melts back
+       into the rain, the tagline breaks into risers that swim up the curtain.
+       come back up and it speaks them again. */
+    let eaten = false;
+    function checkEat() {
+      if (booting) return;
+      const y = scrollY, h = innerHeight;
+      if (!eaten && y > h * .16) {
+        eaten = true;
+        nameGen++; name = null;                    // stop the name mid-decode
+        if (still) W.erase('name'); else W.melt('name');
+        tagline._gen = (tagline._gen || 0) + 1;
+        tagline.textContent = tagline.dataset.text;
+        if (!still) W.absorb(textRect(tagline));
+        for (const el of mast) { el.classList.add('eaten'); el.removeAttribute('data-clear'); }
+        syncInk();
+      } else if (eaten && y < h * .06) {
+        eaten = false;
+        for (const el of mast) { el.classList.remove('eaten'); el.setAttribute('data-clear', ''); }
+        syncInk();
+        speakMasthead();
+      }
+    }
+
     function boot() {
+      document.querySelectorAll('[data-decode]').forEach(el => { el.dataset.text = el.textContent; });
       syncInk();
-      let d = 220;
-      document.querySelectorAll('[data-decode]').forEach(el => { decodeIn(el, d); d += 140; });
+      let d = 220;                                 // the section heads speak on arrival
+      document.querySelectorAll('[data-decode]').forEach(el => {
+        if (mast.includes(el)) return;
+        decodeIn(el, d); d += 140;
+      });
+      const root = document.documentElement;
+      if (root.classList.contains('boot') && scrollY > innerHeight * .16) {
+        root.classList.remove('boot');             // arrived mid-page: no show to miss
+        try { sessionStorage.setItem('booted', '1'); } catch (e) {}
+      }
+      if (root.classList.contains('boot')) runBreach();
+      else { speakMasthead(); checkEat(); }
     }
     if (document.readyState === 'loading')
       document.addEventListener('DOMContentLoaded', boot);
     else boot();
-    addEventListener('resize', syncInk);
-    let scrollPend = false;          // clearings follow the scroll, one per frame
-    addEventListener('scroll', () => {
-      if (scrollPend) return;
-      scrollPend = true;
-      requestAnimationFrame(() => { scrollPend = false; syncInk(); });
-    }, { passive: true });
+    /* the masthead is the wall's: it lags the page with it */
+    const head = document.querySelector('.masthead');
+    const ride = () => { head.style.translate = '0 ' + W.lag() + 'px'; };
+    ride();
+    addEventListener('resize', () => { ride(); syncInk(); placeName(); });
+    addEventListener('scroll', () => { ride(); checkEat(); }, { passive: true });
 
-    /* hands: the cursor touches the wall (sparks), a click tears a wound */
-    let lastTouch = 0, lx = -1, ly = -1;
-    document.addEventListener('pointermove', e => {
-      if (still || !window.deck || !deck.wall) return;
-      const now = performance.now();
-      if (now - lastTouch < 12) return;
-      lastTouch = now;
-      const x = e.clientX, y = e.clientY;
-      if (lx >= 0) {                 // a stroke, not a stamp: fill the gap
-        const dx = x - lx, dy = y - ly, d = Math.hypot(dx, dy);
-        const step = Math.max(6, innerWidth / 480 * 2.2);   // ~one wall px apart
-        const n = Math.min(22, (d / step) | 0);
-        for (let i = 1; i < n; i++)
-          deck.wall.touch(lx + dx * i / n, ly + dy * i / n, 8);
-      }
-      deck.wall.touch(x, y, 10);
-      lx = x; ly = y;
-    });
-    document.addEventListener('pointerleave', () => { lx = -1; ly = -1; });
+    /* hands: the wall looks where the cursor is, a click shatters it */
+    document.addEventListener('pointermove', e => { if (!still) W.look(e.clientX, e.clientY); });
 
     /* the tear corrupts the words it crosses: glyphs boil into static and
-       resolve back. wired only to wild (click-born) slices via the jolt. */
-    const CORR = '\u2591\u2592\u2593\u2588\u259a\u259e\u2599\u259f\u256c\u256a\u256b\u2261\u00a7\u00d8\u00a4\u00d7#%&@';
+       resolve back. wired only to wild slices (a click, a bite) via the jolt. */
     const struckSet = new WeakSet();
     deck.tearstruck = el => {
       if (still || struckSet.has(el)) return;
@@ -1324,20 +2069,16 @@
           let s = '';
           for (let i = 0; i < d.length; i++)
             s += d[i] !== ' ' && Math.random() < amt
-               ? CORR[(Math.random() * CORR.length) | 0] : d[i];
+               ? ng() : d[i];
           n.data = s;
         }
         requestAnimationFrame(step);
       })();
     };
     document.addEventListener('pointerdown', e => {
-      if (!window.deck || !deck.wall) return;
-      if (window.getSelection && String(getSelection())) return;   // not mid-select
-      if (e.target.closest && e.target.closest(
-        'a, p, h1, h2, h3, figcaption, video, img, .when, .what, .section-head'))
-        return;                      // the words are not the wall
-      const p = deck.wall.screenToWall(e.clientX, e.clientY);
-      deck.wall.tear(p[0], p[1]);
+      if (String(getSelection())) return;       // not mid-select
+      const p = W.screenToWall(e.clientX, e.clientY);
+      if (p[1] < W.FH) W.tear(p[0], p[1]);      // the floor below the wall doesn't break
     });
   })();
   </script>
