@@ -10,7 +10,7 @@
     try {
       if (!sessionStorage.getItem('booted') &&
           !matchMedia('(prefers-reduced-motion: reduce)').matches)
-        document.documentElement.classList.add('boot');
+        document.documentElement.classList.add('boot', 'gate');   // gate: black until a key or a click, so the boot has a voice
     } catch (e) {}
   </script>
 
@@ -21,6 +21,9 @@
       src: url("fonts/ibm_vga_8x16.woff") format("woff");
       font-display: swap;
     }
+    @font-face { font-family: "IBM Plex Mono"; src: url("fonts/IBMPlexMono-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+    @font-face { font-family: "IBM Plex Mono"; src: url("fonts/IBMPlexMono-Medium.ttf") format("truetype"); font-weight: 500; font-display: swap; }
+    @font-face { font-family: "Bebas Neue"; src: url("fonts/BebasNeue-Regular.ttf") format("truetype"); font-display: swap; }
 
     /* the rice's palette, names kept */
     :root {
@@ -44,8 +47,7 @@
     body {
       margin: 0; position: relative;
       color: var(--fg);
-      font-family: "Px437 IBM VGA 8x16", "PxPlus IBM VGA8", "IBM VGA 8x16",
-                   ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+      font-family: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
       font-size: 15px; line-height: 1.55;
       cursor: crosshair;
     }
@@ -95,6 +97,7 @@
     .tagline { margin: .6em 0 0; color: var(--accent); font-size: clamp(18px, 2vw, 32px);
                text-shadow: 0 0 8px var(--glow), var(--ground); transition: opacity .35s; }
     .boot #title, .boot .tagline { visibility: hidden; }
+    .gate #wall, .gate #page { visibility: hidden; }
     .walled #title { color: transparent; text-shadow: none; }
     .eaten { opacity: 0; }
 
@@ -125,8 +128,45 @@
     @media (max-width: 560px) {
       .exhibit { grid-template-columns: 1fr; gap: 2px; }
     }
-  </style>
 
+    /* ── the plate, on loan from cyberware.sh ── */
+    .plate{font-size:16px;line-height:1.5}
+    .plate .sprite{image-rendering:pixelated}
+    .plate h1{text-shadow:0 0 10px rgba(111,227,214,.35)}
+    .plate code{font:inherit;color:var(--accent)}
+/* the plate: one ware as one object. corner marks, a calmed field, a bay the sprite floats in, a spec rule. */
+.plate{position:relative;margin:0 0 72px;padding:28px 36px 0;background:rgba(4,7,11,.78)}
+.plate::before,.plate::after,.plate .cm::before,.plate .cm::after{content:"";position:absolute;width:12px;height:12px;border:0 solid var(--rain);opacity:.7}
+.plate::before{top:0;left:0;border-width:1px 0 0 1px}
+.plate::after{top:0;right:0;border-width:1px 1px 0 0}
+.plate .cm::before{bottom:0;left:0;border-width:0 0 1px 1px}
+.plate .cm::after{bottom:0;right:0;border-width:0 1px 1px 0}
+.plate .kind{color:var(--muted);margin:0}
+.plate .body{display:grid;grid-template-columns:minmax(0,1fr) 288px;gap:40px;align-items:center}
+.plate .text{padding-bottom:24px}
+.plate h1{font-family:"Bebas Neue";font-size:28px;line-height:28px;font-weight:normal;margin:4px 0 0;color:var(--accent);letter-spacing:.08em;text-shadow:0 0 10px rgba(111,227,214,.35)}
+.plate h1 .hot{color:var(--fg)} .plate h1 .raw{color:var(--edge)}
+.plate .one{color:var(--fg);margin:12px 0 0;max-width:46ch}
+    .plate .one .note{display:block;margin-top:8px;color:var(--dim)}
+    .plate{margin-bottom:40px}
+.bay{position:relative;width:288px;height:288px}
+.bay .sprite{position:absolute;inset:0;width:288px;height:288px;will-change:transform}
+.bay .floor{position:absolute;left:24px;right:24px;top:216px;height:1px;background:linear-gradient(90deg,transparent,var(--edge) 20%,var(--edge) 80%,transparent)}
+.spec{display:flex;flex-wrap:wrap;gap:4px 24px;margin:0 -36px;padding:14px 36px 16px;border-top:1px solid var(--hair);color:var(--dim)}
+.spec div{white-space:nowrap}
+.spec dt{display:inline;color:var(--muted);margin-right:1ch}
+.spec dd{display:inline;margin:0}
+.spec .wx{margin-left:auto} .spec .wx dd{color:var(--rain)}
+.cwboot .plate h1,.cwboot .plate .spec,.cwboot .plate .kind{visibility:hidden}
+@media (max-width:760px){
+  .plate{padding:24px 20px 0} .plate .body{grid-template-columns:1fr;gap:0}
+  .plate .text{padding-bottom:8px;order:2} .bay{order:1;margin:8px auto 0}
+  .spec{margin:0 -20px;padding:12px 20px 14px;gap:2px 24px} .spec .wx{margin-left:0}
+}
+  </style>
+  <link rel="stylesheet" href="console.css">
+  <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.169.0/build/three.module.js"}}</script>
+  <script>try{ if(!sessionStorage.getItem('cw:plate') && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('cwboot'); }catch(e){}</script>
 </head>
 <body>
 
@@ -138,67 +178,207 @@
       <p class="tagline" data-decode data-clear>the entities are nice beyond the wall</p>
     </header>
 
-    <section class="block">
-      <h2 class="section-head" data-decode>&#9472;&#9472; evidence</h2>
-
-      <div class="exhibit">
-        <div class="when">2026</div>
-        <div class="what">
-          <h3><a href="https://github.com/Sureffi/drawer">drawer</a></h3>
-          <p>A <code>```dot</code> fence in Claude Code becomes a drawing, in place,
-          as the reply streams. One binary, nothing else running.</p>
-          <video src="video/shim-clip.mp4" poster="img/shim-poster.jpg" autoplay loop muted playsinline></video>
-        </div>
-      </div>
-
-      <div class="exhibit">
-        <div class="when">2025</div>
-        <div class="what">
-          <h3><a href="https://github.com/Sureffi/CienceTerminal">CienceTerminal</a></h3>
-          <p>Real-time crypto attention terminal. Event-driven .NET 8
-          microservices on AWS &mdash; SNS/SQS/ECS &mdash; LLM tweet classification,
-          Solana on-chain verification, tiered SignalR alerts, React 19 front.</p>
-          <p class="note">Ran in production, 2025. Walked away over values.
-          <span class="hot">Would again.</span></p>
-          <img src="img/cienceterminal-main.png" alt="CienceTerminal main view" loading="lazy">
-        </div>
-      </div>
-
-      <div class="exhibit">
-        <div class="when">2026</div>
-        <div class="what">
-          <h3>muOS cyberdeck</h3>
-          <p>A hacking terminal for the Anbernic RG35XX-H handheld.
-          26 tool modules, 5 more behind the Konami code, a ghost AI that
-          whispers, procedurally synthesized audio &mdash; zero external files.
-          Gamepad-only, 640&times;480, pygame state machine, builds to .muxapp.</p>
-          <p class="note">Built because it should exist.</p>
-        </div>
-      </div>
-
-      <div class="exhibit">
-        <div class="when">2018&ndash;20<br>age 14&ndash;16</div>
-        <div class="what">
-          <h3><a href="https://github.com/Sureffi/Fivem-lua-mod-menus">Motion &amp; Curse</a></h3>
-          <p>Two GTA V mod menus in Lua. Motion at 14. Curse at 16 &mdash;
-          a from-scratch immediate-mode UI framework inside a mod menu.</p>
-          <p class="note">It was always like this.</p>
-        </div>
-      </div>
+    <section id="home">
+      <canvas class="weather"></canvas>
+      <div id="bar"></div>
+      <aside id="side"></aside>
+      <div id="hint"><b>←→</b> rooms <b>↑↓</b> things <b>enter</b> open <b>esc</b> back <b>r</b> replay boot <b>m</b> mute</div>
     </section>
 
-    <section class="block">
-      <h2 class="section-head" data-decode>&#9472;&#9472; writing</h2>
-      <p><a href="https://x.com/Sureffi/status/2078201650133741766">On context economics in agentic sessions</a></p>
-      <p class="note" style="margin-top:.6em">How to write an instruction file &mdash; in the pipe.</p>
-    </section>
-
-    <footer class="block">
-      <p><a href="https://x.com/Sureffi">x.com/Sureffi</a> &middot;
-      <a href="https://github.com/Sureffi">github</a> &middot;
-      <a href="mailto:sureffi@proton.me">sureffi@proton.me</a></p>
-    </footer>
   </main>
+
+  <template id="app-wares">
+    <nav></nav>
+    <div class="plates">
+      <header class="plate" id="drawer" data-name="drawer" data-sub="cortex · render mod"><i class="cm"></i>
+        <div class="body">
+          <div class="text">
+            <p class="kind">cortex · render mod</p>
+            <h1>DRAWER</h1>
+            <p class="one">A <code>```dot</code> fence in a Claude Code reply becomes a drawing. In place, while the reply is still streaming. One binary, nothing else running.</p>
+          </div>
+          <div class="bay"><canvas class="sprite" data-piece="pen" data-hue="9aa6ff"></canvas><i class="floor"></i></div>
+        </div>
+        <dl class="spec">
+          <div><dt>when</dt><dd>2026</dd></div>
+          <div><dt>stack</dt><dd>go</dd></div>
+          <div><dt>runs on</dt><dd>Claude Code</dd></div>
+          <div><dt>state</dt><dd>v0.3.0 · MIT</dd></div>
+          <div class="wx"><dt>source</dt><dd><a href="https://github.com/Sureffi/drawer">github.com/Sureffi/drawer</a></dd></div>
+        </dl>
+        <div class="more">
+<video class="shot" src="wares/img/drawer.mp4" poster="wares/img/drawer-poster.png" muted loop playsinline autoplay></video>
+  <p class="cap">a live session. the model writes DOT, you see the picture.</p>
+
+  
+  <h2>what it is</h2>
+  <p>One Go binary, installed as a Claude Code plugin. It hooks the reply display. When a <code>```dot</code> fence arrives, it lays the graph out with graphviz and paints it into the terminal where the fence sits. Graphviz, the type and the painting are all inside the binary. Nothing else to install.</p>
+
+  <h2>what it does</h2>
+  <ul>
+    <li>In kitty or ghostty, through tmux too, the graph is a picture in the reply.</li>
+    <li>Anywhere else it's drawn in box characters, which every terminal draws with its own hand.</li>
+    <li>Draws as the reply arrives. The graph grows with the sentence.</li>
+    <li><code>drawer -doctor</code> says what this terminal gets and why.</li>
+  </ul>
+
+  <img class="shot" src="wares/img/drawer-cells.png" alt="a graph drawn in box characters">
+  <p class="cap">box drawing, where a terminal can't show pictures.</p>
+
+  <h2>install</h2>
+<pre>/plugin marketplace add sureffi/drawer
+/plugin install drawer@drawer</pre>
+  <p>Then ask for a graph. Linux and macOS.</p>
+
+  <h2>settings</h2>
+  <p>Three environment variables, set for <code>claude</code> in <code>settings.json</code> or the shell.</p>
+  <ul>
+    <li><code>DRAWER_RENDER</code> forces a drawing: <code>auto</code>, <code>pixels</code> or <code>cells</code>.</li>
+    <li><code>DRAWER_THEME</code> names a theme file.</li>
+    <li><code>DRAWER_TEE</code> records every payload the hook receives, for <code>drawer -deltas</code> to replay.</li>
+  </ul>
+  <div class="links"><a href="https://github.com/Sureffi/drawer">source</a><a href="https://github.com/Sureffi/drawer#settings">readme</a></div>
+  
+        </div>
+      </header>
+      <header class="plate" id="agentsdk" data-name="agentSDK.NET" data-sub="nervous · neural link"><i class="cm"></i>
+        <div class="body">
+          <div class="text">
+            <p class="kind">nervous · neural link</p>
+            <h1>AGENTSDK.NET</h1>
+            <p class="one">The Claude Agent SDK for .NET. Drives the <code>claude</code> binary over stream-json, on the account that binary is logged into. No API key.</p>
+          </div>
+          <div class="bay"><canvas class="sprite" data-piece="cable" data-hue="6fe3d6"></canvas><i class="floor"></i></div>
+        </div>
+        <dl class="spec">
+          <div><dt>when</dt><dd>2026</dd></div>
+          <div><dt>stack</dt><dd>c# · net10.0</dd></div>
+          <div><dt>runs on</dt><dd>the claude binary</dd></div>
+          <div><dt>state</dt><dd>1.0.0 · MIT</dd></div>
+          <div class="wx"><dt>source</dt><dd><a href="https://github.com/Sureffi/agentSDK.NET">github.com/Sureffi/agentSDK.NET</a></dd></div>
+        </dl>
+        <div class="more">
+
+  <h2>what it is</h2>
+  <p>One namespace, <code>Claude.Agent</code>. A client, a live session, and a second client over the sessions the binary keeps on disk. Options for how the binary is reached and for what one call asks of it. Hooks and a permission callback as delegates. In-process MCP tools. Typed models built off the wire, with a factory for your own tests. Shaped after the Azure SDK design guidelines for .NET.</p>
+
+  <h2>what it does</h2>
+  <ul>
+    <li>Runs an agent loop from .NET with the session as the credential.</li>
+    <li>Carries tool use both directions: the binary's tools typed for you, your tools served to it in-process over MCP.</li>
+    <li>Resumes sessions the binary already has on disk.</li>
+    <li>One line on the generic host. Works without a container the same way.</li>
+  </ul>
+
+  <h2>install</h2>
+  <p>Not on nuget. <code>dotnet pack</code> at the root gives you the package for a folder feed, or reference the project.</p>
+<pre>&lt;PackageReference Include="Claude.Agent" Version="1.0.0" /&gt;
+&lt;PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.12" /&gt;</pre>
+<pre>builder.Services.AddClaudeAgentClient(o =&gt; o.Defaults.Model = "haiku");</pre>
+  <p>Needs .NET and a <code>claude</code> on PATH that's logged in.</p>
+  <div class="links"><a href="https://github.com/Sureffi/agentSDK.NET">source</a></div>
+  
+        </div>
+      </header>
+      <header class="plate" id="cience" data-name="CienceTerminal" data-sub="sensory · attention rig"><i class="cm"></i>
+        <div class="body">
+          <div class="text">
+            <p class="kind">sensory · attention rig</p>
+            <h1>CIENCETERMINAL</h1>
+            <p class="one">Real-time crypto attention terminal. Event-driven .NET 8 microservices on AWS &mdash; SNS/SQS/ECS &mdash; LLM tweet classification, Solana on-chain verification, tiered SignalR alerts, React 19 front. <span class="note">Ran in production, 2025. Walked away over values. <span class="hot">Would again.</span></span></p>
+          </div>
+          <div class="bay"><canvas class="sprite" data-piece="mast" data-hue="6fe3d6"></canvas><i class="floor"></i></div>
+        </div>
+        <dl class="spec">
+          <div><dt>when</dt><dd>2025</dd></div>
+          <div><dt>stack</dt><dd>.NET 8 · React 19 · AWS</dd></div>
+          <div><dt>runs on</dt><dd>AWS</dd></div>
+          <div><dt>state</dt><dd>retired</dd></div>
+          <div class="wx"><dt>source</dt><dd><a href="https://github.com/Sureffi/CienceTerminal">github.com/Sureffi/CienceTerminal</a></dd></div>
+        </dl>
+        <div class="more">
+
+  <h2>what it is</h2>
+  <p>A terminal that watches attention move through crypto twitter and turns it into ranked, timed signal. Event-driven .NET 8 microservices on AWS, wired with SNS, SQS and ECS. Tweets are classified by an LLM, tokens are verified on-chain on Solana, alerts go out in tiers over SignalR to a React 19 front.</p>
+  <h2>what it did</h2>
+  <ul>
+    <li>Ran in production through 2025.</li>
+    <li>Walked away over values. Would again.</li>
+  </ul>
+  <div class="links"><a href="https://github.com/Sureffi/CienceTerminal">source</a></div>
+  
+        </div>
+      </header>
+      <header class="plate" id="deck" data-name="muOS cyberdeck" data-sub="handheld · cyberdeck"><i class="cm"></i>
+        <div class="body">
+          <div class="text">
+            <p class="kind">handheld · cyberdeck</p>
+            <h1>MUOS CYBERDECK</h1>
+            <p class="one">A hacking terminal for the Anbernic RG35XX-H. 26 tool modules, 5 more behind the Konami code, a ghost AI that whispers, procedurally synthesized audio &mdash; zero external files. Gamepad-only, 640&times;480, pygame state machine, builds to .muxapp. <span class="note">Built because it should exist.</span></p>
+          </div>
+          <div class="bay"><canvas class="sprite" data-piece="deck" data-hue="9aa6ff"></canvas><i class="floor"></i></div>
+        </div>
+        <dl class="spec">
+          <div><dt>when</dt><dd>2026</dd></div>
+          <div><dt>stack</dt><dd>python · pygame</dd></div>
+          <div><dt>runs on</dt><dd>RG35XX-H · muOS</dd></div>
+          <div><dt>state</dt><dd>—</dd></div>
+          <div class="wx"><dt>target</dt><dd>.muxapp</dd></div>
+        </dl>
+        <div class="more">
+
+  <h2>what it is</h2>
+  <p>A terminal for a handheld with no keyboard. Everything is driven from the pad. The whole thing is one pygame state machine, packaged as a .muxapp for muOS.</p>
+  <h2>what it does</h2>
+  <ul>
+    <li>26 tool modules. Five more behind the Konami code.</li>
+    <li>A ghost AI that whispers.</li>
+    <li>Procedurally synthesized audio. Zero external files.</li>
+    <li>Built because it should exist.</li>
+  </ul>
+  
+        </div>
+      </header>
+      <header class="plate" id="motion" data-name="Motion &amp; Curse" data-sub="legacy · first chrome"><i class="cm"></i>
+        <div class="body">
+          <div class="text">
+            <p class="kind">legacy · first chrome</p>
+            <h1>MOTION &amp; CURSE</h1>
+            <p class="one">Two GTA V mod menus in Lua. Motion at 14. Curse at 16 &mdash; a from-scratch immediate-mode UI framework inside a mod menu. <span class="note">It was always like this.</span></p>
+          </div>
+          <div class="bay"><canvas class="sprite" data-piece="pad" data-hue="9aa6ff"></canvas><i class="floor"></i></div>
+        </div>
+        <dl class="spec">
+          <div><dt>when</dt><dd>2018–20</dd></div>
+          <div><dt>stack</dt><dd>lua</dd></div>
+          <div><dt>runs on</dt><dd>GTA V · FiveM</dd></div>
+          <div><dt>state</dt><dd>archived</dd></div>
+          <div class="wx"><dt>source</dt><dd><a href="https://github.com/Sureffi/Fivem-lua-mod-menus">github.com/Sureffi/Fivem-lua-mod-menus</a></dd></div>
+        </dl>
+        <div class="more">
+
+  <h2>what it is</h2>
+  <p>The first chrome. Two mod menus for FiveM, in Lua. Motion came first, at fourteen. Curse two years later, and by then the menu needed its own UI framework, so it got one, immediate-mode, written from nothing inside the menu itself.</p>
+  <h2>what it says</h2>
+  <ul>
+    <li>It was always like this.</li>
+  </ul>
+  <div class="links"><a href="https://github.com/Sureffi/Fivem-lua-mod-menus">source</a></div>
+  
+        </div>
+      </header>
+    </div>
+  </template>
+  <template id="app-writing">
+    <h1>WRITING</h1>
+    <div class="row"><a href="https://x.com/Sureffi/status/2078201650133741766">On context economics in agentic sessions</a><small>How to write an instruction file &mdash; in the pipe. On x.</small></div>
+  </template>
+  <template id="app-contact">
+    <h1>CONTACT</h1>
+    <div class="row"><a href="https://x.com/Sureffi">x.com/Sureffi</a><small>the feed</small></div>
+    <div class="row"><a href="https://github.com/Sureffi">github.com/Sureffi</a><small>the repos</small></div>
+    <div class="row"><a href="mailto:sureffi@proton.me">sureffi@proton.me</a><small>it gets read</small></div>
+  </template>
 
   <noscript>
     <marquee scrollamount="4" style="color:#2aa9a8">
@@ -322,7 +502,7 @@
   }
   const P1Q = .55 * 255 | 0;         // the heat's decay odds, precomputed
 
-  let mode = 'idle';                 // 'idle' | 'working'
+  let mode = 'idle';                 // 'idle' | 'working' | 'hold' (the title stands: the rain thins, almost nothing stirs)
 
   /* attention: the spot the wall is watching. it wanders when you idle,
      and comes to your cursor. the weather burns around it. */
@@ -1200,7 +1380,7 @@ void main() {
       att.x += (att.tx - att.x) * .045;            // the gaze drifts, never snaps
       att.y += (att.ty - att.y) * .045;
       if (!still) {
-        if (!linkPh) flow += mode === 'working' ? .85 : .5;   // the curtain falls
+        if (!linkPh) flow += mode === 'working' ? .85 : mode === 'hold' ? .12 : .5;   // the curtain falls; held, it barely does
         if (flow > 1e7) flow -= 8388608;           // wraps clean mod 256
       }
       if (!linkPh) {                               // linked, the wall stands still
@@ -1359,7 +1539,7 @@ void main() {
   function emberPass(now) {          // what each adds where it is, for the glass
     const dt = Math.min(64, now - lastNow || 16); lastNow = now;
     nEmb = 0;
-    spawnAcc += dt * (mode === 'working' ? .010 : .0042) * (still ? .25 : 1);
+    spawnAcc += dt * (mode === 'working' ? .010 : mode === 'hold' ? .0012 : .0042) * (still ? .25 : 1);
     while (spawnAcc > 1) { spawnAcc -= 1; spawnEmber(); }
     for (let i = sparks.length - 1; i >= 0; i--) {
       const s = sparks[i];
@@ -1682,7 +1862,7 @@ void main() {
         if (q.a >= 1) full++;
         if (q.a > .02) stampPx(q.x, q.y, (q.a * 32) | 0, 0, q.a > .45);
       }
-      nameT.onFill(sum / namePx.length);
+      if (nameT.onFill) nameT.onFill(sum / namePx.length);
       if (full >= namePx.length * .985) done = true;
     }
     for (let k = 0; k < apps.length; k++) {
@@ -1795,24 +1975,6 @@ void main() {
 
     /* the same line, accrued alongside the name: each glyph comes up out of
        nothing at its own point of the fill, raw → hot → resolved */
-    function accrue(el) {
-      const text = el.dataset.text, th = [...text].map(() => .06 + Math.random() * .8);
-      let spans = null;
-      return p => {
-        if (!spans) {
-          el.textContent = '';
-          spans = [...text].map(() => el.appendChild(document.createElement('span')));
-          el.style.visibility = 'visible';
-        }
-        spans.forEach((sp, i) => {
-          const ch = text[i], d = p - th[i];
-          const st = ch === ' ' || d >= 0 ? 'res' : d > -.07 ? 'hot' : d > -.22 ? 'raw' : '';
-          if (st === 'res') { if (sp.className || sp.textContent !== ch) { sp.className = ''; sp.textContent = ch; } }
-          else { sp.className = st || 'raw'; sp.textContent = st ? ng() : '\u00a0'; }
-        });
-      };
-    }
-
     /* the rect of the words themselves, not the block they sit in */
     function textRect(el) {
       const r = document.createRange(); r.selectNodeContents(el);
@@ -1831,10 +1993,11 @@ void main() {
     const hurryUp = () => { hurry = true; };
     const wait = ms => hurry ? null : sleep(ms);
     const widthOf = s => s.length * W.CELL - 1;
+    const cue = n => dispatchEvent(new CustomEvent('wallcue', { detail: n }));   // the breach tells the room where it is; sound listens
 
     async function typeIn(id, t, msPer) {
       for (let n = 1; n < t.s.length && !hurry; n++) {
-        W.write(id, { ...t, n });
+        W.write(id, { ...t, n }); cue('type');
         await sleep(msPer);
       }
       W.write(id, t);
@@ -1844,6 +2007,7 @@ void main() {
     async function runBreach() {
       booting = true;
       W.state = 'working';                         // the wall runs hot while it's breached
+      cue('begin');
       addEventListener('keydown', hurryUp);
       addEventListener('pointerdown', hurryUp);
 
@@ -1888,7 +2052,7 @@ void main() {
       for (let gr = 0; gr < 5; gr++) {             // the matrix surfaces row by row
         drawGrid(null);
         for (let k = gr + 1; k < 5; k++) W.erase('g' + k);
-        await wait(70);
+        cue('row'); await wait(70);
       }
       drawGrid({ row: true, i: 0 });
       drawBuffer();
@@ -1900,11 +2064,11 @@ void main() {
         const to = active.row ? pc : pr;
         for (let j = 0; j <= to; j++) {            // the cursor walks the line
           drawGrid(active, active.row ? [pr, j] : [j, pc]);
-          await wait(105);
+          cue('step'); await wait(105);
         }
         await wait(170);
         drawGrid(active, [pr, pc], true);
-        await wait(80);
+        cue('pick'); await wait(80);
         buf[k] = grid[pr][pc];
         grid[pr][pc] = '[]';
         picked.add(pr * 5 + pc);
@@ -1915,30 +2079,41 @@ void main() {
       }
 
       W.write('head', { ...head('breached'), lvl: 34 });
-      await wait(420);
+      cue('breached'); await wait(420);
       const ids = ['head', 'g0', 'g1', 'g2', 'g3', 'g4', 'buf'];
-      if (hurry) for (const id of ids) W.melt(id);
+      if (hurry) { cue('melt'); for (const id of ids) W.melt(id); }
       else {
+        cue('migrate');
         const geo = nameGeom(), nw = widthOf(title.dataset.text) * geo.sx;
         W.hunt(geo.x + nw / 2, nw / 2);
         W.gather(mx, my, 3600);
         await sleep(300);
-        await W.migrate(ids, { s: title.dataset.text, ...nameGeom(), onFill: accrue(tagline) });
+        await W.migrate(ids, { s: title.dataset.text, ...nameGeom() });
       }
       settleName();
-      document.documentElement.classList.remove('boot');
+      cue('land');
+      W.state = 'hold';                            // the motion stops. the name stands alone in the held rain
+      await wait(1100);
+      tagline.style.visibility = 'visible';        // then the line, one glyph at a time
+      cue('line'); decodeIn(tagline, 0);
+      await sleep(tagline.dataset.text.length * DECODE_MS + 600);
+      document.documentElement.classList.remove('boot');   // the console arms press start on this
       tagline.style.visibility = '';
-      if (hurry) decodeIn(tagline, 200);
-      else tagline.textContent = tagline.dataset.text;
-      await wait(700);
 
-      W.state = 'idle';
       removeEventListener('keydown', hurryUp);
       removeEventListener('pointerdown', hurryUp);
       try { sessionStorage.setItem('booted', '1'); } catch (e) {}
       booting = false;
       checkEat();
     }
+    /* the show again, in place: the name goes, the title is hidden as on a cold load, and the breach runs. no reload,
+       so a page that has had a key keeps its voice. */
+    W.replay = async () => {
+      if (booting || still || scrollY > innerHeight * .16) return;
+      hurry = false; nameGen++; name = null; W.erase('name');
+      document.documentElement.classList.add('boot');
+      await runBreach();
+    };
 
     const title = document.getElementById('title');
     const tagline = document.querySelector('.tagline');
@@ -2026,10 +2201,16 @@ void main() {
       });
       const root = document.documentElement;
       if (root.classList.contains('boot') && scrollY > innerHeight * .16) {
-        root.classList.remove('boot');             // arrived mid-page: no show to miss
+        root.classList.remove('boot', 'gate');     // arrived mid-page: no show to miss
         try { sessionStorage.setItem('booted', '1'); } catch (e) {}
       }
-      if (root.classList.contains('boot')) runBreach();
+      if (root.classList.contains('boot')) {
+        /* the gate: the browser opens sound only after a gesture, so the show waits for one. that press is the gate's,
+           not a hurry: the breach hasn't started listening yet. */
+        let opened = false;
+        const open = () => { if (opened) return; opened = true; root.classList.remove('gate'); runBreach(); };
+        addEventListener('keydown', open); addEventListener('pointerdown', open);
+      }
       else { speakMasthead(); checkEat(); }
     }
     if (document.readyState === 'loading')
@@ -2083,5 +2264,6 @@ void main() {
   })();
   </script>
 
+  <script type="module" src="console.js"></script>
 </body>
 </html>
