@@ -383,3 +383,26 @@ addEventListener('hashchange', () => { if (location.hash && !HASH.test(location.
 arrive(); mountSprites();
 // the names' widths decide the dock on a touch screen; the font may land after the first measure
 if (document.fonts) document.fonts.ready.then(() => { const d = dock; measureDock(); if (d !== dock) snap(); });
+
+// ── the readout: ?debug puts the state on the screen, so a screenshot from a phone says what the phone saw
+if (location.search.includes('debug')){
+  const d = document.createElement('pre'); d.id = 'debug'; document.body.appendChild(d);
+  let last = '', err = '', n = 0;
+  addEventListener('error', e => { err = (e.message || e.error || 'error') + ' @' + (e.filename || '').split('/').pop() + ':' + e.lineno; });
+  addEventListener('unhandledrejection', e => { err = 'reject: ' + (e.reason && e.reason.message || e.reason); });
+  for (const t of ['touchstart','touchmove','touchend','pointerdown','pointerup','click','wheel','keydown']) addEventListener(t, e => { n++; const p = e.touches && e.touches[0] || e; last = `${t} ${p.clientX|0},${p.clientY|0}`; }, { passive:true, capture:true });
+  const vv = visualViewport;
+  (function tick(){
+    d.textContent = [
+      `ua ${navigator.userAgent.match(/(iPhone|iPad|Android)[^)]*/)?.[0] || 'desktop'} dpr ${devicePixelRatio}`,
+      `inner ${innerWidth}×${innerHeight} vv ${vv ? `${vv.width|0}×${vv.height|0} scale ${vv.scale.toFixed(2)} off ${vv.offsetLeft|0},${vv.offsetTop|0}` : '-'}`,
+      `doc ${document.documentElement.scrollWidth}×${document.documentElement.scrollHeight} scrollY ${scrollY|0} homeY ${homeY()|0}`,
+      `html ${document.documentElement.className} home ${home.className || '-'} side ${side.className || '-'}`,
+      `state ${state} moving ${moving} armed ${armed} app ${app ? app.name : '-'} ci ${ci} ii ${ii[ci]} dock ${typeof dock !== 'undefined' ? dock : '?'}`,
+      `coarse ${matchMedia('(pointer:coarse)').matches} hover ${matchMedia('(hover:none)').matches} audio ${S.state}`,
+      `events ${n} last ${last}`,
+      err ? `ERR ${err}` : '',
+    ].join('\n');
+    requestAnimationFrame(tick);
+  })();
+}
