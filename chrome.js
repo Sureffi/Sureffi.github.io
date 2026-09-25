@@ -252,13 +252,15 @@ function visible(s, inApp){
   const col = s.cv.closest('.col'); if (col && !col.parentElement.classList.contains('on')) return false;  // a column not shown
   const r = s.cv.getBoundingClientRect(); return r.width > 0 && r.bottom > 0 && r.top < innerHeight;
 }
+const due = [];                                                                            // this frame's sprites; reused, nothing new per frame
 function frame(){
-  R.list = R.list.filter(s => s.cv.isConnected || dispose(s));
-  if (!R.list.length){ R.run = false; return; }
+  let n = 0; for (const s of R.list) if (s.cv.isConnected) R.list[n++] = s; else dispose(s);
+  R.list.length = n;
+  if (!n){ R.run = false; return; }
   requestAnimationFrame(frame);
   const gl = R.gl, t = still ? 2 : R.clock.getElapsedTime(), now = performance.now(), inApp = document.documentElement.classList.contains('in-app');
   // lay out the sheet: the visible sprites, left to right in rows
-  const due = []; let x = 0, y = 0, row = 0;
+  due.length = 0; let x = 0, y = 0, row = 0;
   for (const s of R.list){
     if (s.fly) place(s, now);
     else if (s.onPlate){ const w = Math.floor(s.cv.clientWidth/SCALE); if (w >= 8) s.hi = s.lo = w; }   // a bay's size can change with the viewport
@@ -398,6 +400,10 @@ export function mountPlate(scope = document, { boot = true } = {}){
 }
 
 // ── weathers ─────────────────────────────────────────────────────
+// a colour's alphas, made once: a weather picks a string out of these instead of building one per pixel per frame
+const tint = rgb => Array.from({ length:101 }, (_, i) => `rgba(${rgb},${i/100})`);
+const TEAL = tint('111,227,214'), RAINC = tint('42,169,168'), PERI = tint('154,166,255');
+const al = a => a <= 0 ? 0 : a >= 1 ? 100 : (a*100 + .5) | 0;
 // each is (ctx, W, H, rnd) → { step(now, dt) } drawing into a cleared low-res 2d canvas.
 export const WEATHER = {
   // the floor: spent packets, sparse, twinkling. the wall's ground, without the wall.
@@ -409,7 +415,7 @@ export const WEATHER = {
       for (let i=0;i<N;i++){
         if (!still) x[i] += Math.sin(p[i])*.004*dt; if (x[i] < 0) x[i] += W; if (x[i] >= W) x[i] -= W;
         const v = a[i] * (.55 + .45*Math.sin(t*.9 + p[i]));
-        ctx.fillStyle = v > .5 ? `rgba(111,227,214,${v})` : `rgba(42,169,168,${v})`;
+        ctx.fillStyle = (v > .5 ? TEAL : RAINC)[al(v)];
         ctx.fillRect(x[i]|0, y[i]|0, 1, 1);
       } } };
   },
@@ -459,11 +465,11 @@ export const WEATHER = {
   },
   // the second room: a slow ribbon, the way the psp's never stopped. three bands, out of phase, dithered by the palette.
   wave(ctx, W, H){
-    const bands = [[.55, .012, 1.0, '42,169,168', .22], [.62, .017, .7, '154,166,255', .14], [.5, .009, 1.3, '111,227,214', .10]];
+    const bands = [[.55, .012, 1.0, RAINC[22]], [.62, .017, .7, PERI[14]], [.5, .009, 1.3, TEAL[10]]];
     return { step(now){
       const t = now/1000;
-      for (const [y0, k, sp, col, a] of bands){
-        ctx.fillStyle = `rgba(${col},${a})`;
+      for (const [y0, k, sp, style] of bands){
+        ctx.fillStyle = style;
         for (let x=0;x<W;x++){
           const y = H*y0 + Math.sin(x*k + t*sp*.6)*H*.08 + Math.sin(x*k*2.3 - t*sp*.4)*H*.03;
           const h = 10 + Math.sin(x*k*.7 + t*.3)*6;
@@ -482,7 +488,7 @@ export const WEATHER = {
         if (y[i]-len[i] > H) seed(i,true);
         const L = len[i];
         for (let k=0;k<L;k++){ const yy = (y[i]-k)|0; if (yy<0||yy>=H) continue;
-          ctx.fillStyle = `rgba(42,169,168,${Math.min(1, b[i]*(1-k/L)*(k?1:1.6)*.5)})`; ctx.fillRect(x[i], yy, 1, 1); }
+          ctx.fillStyle = RAINC[al(b[i]*(1-k/L)*(k?1:1.6)*.5)]; ctx.fillRect(x[i], yy, 1, 1); }
       } } };
   },
   // drawer: ink. graphs lay themselves down in the dark — a node, an edge to the next, a few more, then they fade.
@@ -493,7 +499,7 @@ export const WEATHER = {
       const cx = Math.random()*W, cy = Math.random()*H, spread = 18 + Math.random()*30;
       for (let i=0;i<n;i++) nodes.push({ x: cx + (Math.random()-.5)*spread*2, y: cy + (i/n - .5)*spread*2 + (Math.random()-.5)*8, w: 5 + (Math.random()*10)|0 });
       for (let i=1;i<n;i++) edges.push([ (Math.random()*i)|0, i ]);
-      graphs.push({ nodes, edges, born: performance.now(), life: 9000 + Math.random()*8000, hue: Math.random() < .3 ? '111,227,214' : '154,166,255' });
+      graphs.push({ nodes, edges, born: performance.now(), life: 9000 + Math.random()*8000, hue: Math.random() < .3 ? TEAL : PERI });
     }
     for (let i=0;i<9;i++){ spawn(); graphs[i].born -= Math.random()*8000; }
     return { step(now){
@@ -508,10 +514,10 @@ export const WEATHER = {
         for (const [a,b] of G.edges){ k++; const p = Math.min(1, Math.max(0, (draw - k*per) / per));
           if (p <= 0) continue;
           const A = G.nodes[a], B = G.nodes[b];
-          ctx.lineWidth = 1; ctx.strokeStyle = `rgba(${G.hue},${.28*fade})`; ctx.beginPath(); ctx.moveTo(A.x|0, A.y|0); ctx.lineTo((A.x+(B.x-A.x)*p)|0, (A.y+(B.y-A.y)*p)|0); ctx.stroke(); }
+          ctx.lineWidth = 1; ctx.strokeStyle = G.hue[al(.28*fade)]; ctx.beginPath(); ctx.moveTo(A.x|0, A.y|0); ctx.lineTo((A.x+(B.x-A.x)*p)|0, (A.y+(B.y-A.y)*p)|0); ctx.stroke(); }
         for (const n of G.nodes){ k++; const p = Math.min(1, Math.max(0, (draw - k*per) / per));
           if (p <= 0) continue;
-          ctx.strokeStyle = `rgba(${G.hue},${.5*fade})`; ctx.strokeRect((n.x - n.w/2)+.5|0, (n.y-2)+.5|0, (n.w*p)|0, 4); }
+          ctx.strokeStyle = G.hue[al(.5*fade)]; ctx.strokeRect((n.x - n.w/2)+.5|0, (n.y-2)+.5|0, (n.w*p)|0, 4); }
       } } };
   },
   // cience: the attention rig's sky. a beam sweeps from a dish below the left edge, the way the mast's does; what it
@@ -564,11 +570,18 @@ export const WEATHER = {
   },
 };
 const RES = { rain:240, ink:360, wire:640, wave:320, dust:400, night:480, sweep:400 };
+// a resize that leaves the size alone doesn't start the weather over. on a phone the size comes off the layout viewport,
+// which a pinch doesn't move.
+const small = matchMedia('(max-width:759px), (hover:none) and (pointer:coarse)');
 export function mountWeather(name, cv = document.getElementById('weather'), { alpha = false } = {}){
   if (!cv) return;
   const ctx = cv.getContext('2d', { alpha });
   const W = RES[name] || 240; let H = 135, sim = null;
-  function size(){ H = Math.round(W * innerHeight / innerWidth); cv.width = W; cv.height = H; sim = WEATHER[name](ctx, W, H); if (still) paint(performance.now()); }
+  function size(){
+    const de = document.documentElement, sm = small.matches, h = Math.round(W * (sm ? de.clientHeight : innerHeight) / (sm ? de.clientWidth : innerWidth));
+    if (sim && h === H) return;
+    H = h; cv.width = W; cv.height = H; sim = WEATHER[name](ctx, W, H); if (still) paint(performance.now());
+  }
   function paint(now, dt = 1){ if (alpha) ctx.clearRect(0,0,W,H); else { ctx.fillStyle = '#04070b'; ctx.fillRect(0,0,W,H); } sim.step(now, dt); }
   addEventListener('resize', size); size();
   let last = performance.now();

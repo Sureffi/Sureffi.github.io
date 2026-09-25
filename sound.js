@@ -1,11 +1,15 @@
 /* sound.js — the console's voice. nothing loads: everything is made in the browser, a few oscillators and noise.
    the hum starts on the press (the first gesture; before it the browser keeps audio shut). ticks on moves, a click on
    enter, a lower tick on back. `m` mutes, and the mute is remembered. */
-let ac = null, master, humG, noiseBuf, muted = localStorage.getItem('cw:mute') === '1';
+// storage can throw (blocked, some private modes): the mute is then only this visit's
+const mem = { get(){ try { return localStorage.getItem('cw:mute'); } catch(e){ return null; } }, set(v){ try { localStorage.setItem('cw:mute', v); } catch(e){} } };
+let ac = null, master, humG, noiseBuf, muted = mem.get() === '1';
 
 function ctx(){
   if (ac) return ac;
   ac = new (window.AudioContext || window.webkitAudioContext)();
+  // a phone opens the context on the finger's lift, after the breach has begun: the drone it missed comes in then
+  ac.onstatechange = () => { if (ac.state === 'running' && breaching && !drone){ reverb(); droneOn(); } };
   const comp = ac.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 4; comp.attack.value = .003; comp.release.value = .12;
   master = ac.createGain(); master.gain.value = muted ? 0 : .8;
   master.connect(comp); comp.connect(ac.destination);
@@ -134,7 +138,7 @@ function hit({ band, q = 3, len, g, body, bodyLen, bodyG }){
 /* the boot score. the breach sends cues (wallcue events) at each stage; each cue is a sound, and the stages between
    are a drone that rises through the migration and cuts on the landing. one-shots only fire with the context running:
    while the browser holds it shut, nothing queues up to fire all at once when it opens. */
-let drone = null, grains = 0;
+let drone = null, grains = 0, breaching = false;
 const live = () => ac && ac.state === 'running';
 function droneOn(){
   if (drone || !ac) return;
@@ -186,7 +190,8 @@ const BOOT = {
   line(){ grains = 1; grain(); setTimeout(() => { grains = 0; }, 2000); },   // the line decodes under a lighter crackle
   ready(){ hit({ band: 2000, q: 5, len: .02, g: .16, body: 880, bodyLen: .04, bodyG: .08 }); },
 };
-addEventListener('wallcue', e => { if (!ac) ctx(); if (!live()) return; reverb(); const f = BOOT[e.detail]; if (f) f(); });
+addEventListener('wallcue', e => { if (e.detail === 'begin') breaching = true; else if (e.detail === 'land') breaching = false;
+  if (!ac) ctx(); if (!live()) return; reverb(); const f = BOOT[e.detail]; if (f) f(); });
 
 export const S = {
   open(){ ctx(); if (ac.state !== 'running') ac.resume().catch(() => {}); },                       // on the gate's press: the context, nothing playing
@@ -204,13 +209,15 @@ export const S = {
     bed.fifth.gain.setTargetAtTime(Math.random() < room.fifth ? rnd(.5, 1) : 0, now, 1.2);
     bed.aG.gain.setTargetAtTime(room.air, now, .8); bed.alp.frequency.setTargetAtTime(room.airF, now, .8);
   },
-  mute(){ muted = !muted; localStorage.setItem('cw:mute', muted ? '1' : '0'); if (master) master.gain.setTargetAtTime(muted ? 0 : .8, t(), .05); return muted; },
+  mute(){ muted = !muted; mem.set(muted ? '1' : '0'); if (master) master.gain.setTargetAtTime(muted ? 0 : .8, t(), .05); return muted; },
   get muted(){ return muted; },
   get state(){ return ac ? ac.state : 'none'; },
   onPass: null,
   cue(n){ dispatchEvent(new CustomEvent('wallcue', { detail: n })); },
   quiet(){ sceneOn = false; gen++; if (humG){ humG.gain.setTargetAtTime(0, t(), .2); const g = humG; setTimeout(() => { try { g.disconnect(); } catch(e){} }, 1200); humG = null; } },   // the scene down: a replay starts it over                                                          // (dir, seconds): something crossed; the picture gets it too
 };
-// the browser opens audio on a key or a click, not a wheel: if the hum was asked for on a wheel, the next real gesture starts it
-addEventListener('keydown', () => { if (ac && ac.state !== 'running') ac.resume(); });
-addEventListener('pointerdown', () => { if (ac && ac.state !== 'running') ac.resume(); });
+// the browser opens audio on a key or a click, not a wheel: if the hum was asked for on a wheel, the next real gesture starts it.
+// a touch counts on its lift, not its landing (touchend, pointerup, click); ios also leaves a context 'interrupted' after a
+// call or the background, and the next touch brings it back.
+const wake = () => { if (ac && ac.state !== 'running') ac.resume().catch(() => {}); };
+for (const ev of ['keydown', 'pointerdown', 'pointerup', 'touchend', 'click']) addEventListener(ev, wake, { passive:true });

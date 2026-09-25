@@ -1,5 +1,6 @@
 /* the console: home is the xmb on the wall's floor; apps are fullscreen, each its own weather; esc is always home. */
-#home{position:relative;min-height:100svh;width:100vw;margin-left:calc(50% - 50vw);font-size:16px;line-height:1.5;user-select:none}
+#home{position:relative;min-height:100svh;width:100vw;margin-left:calc(50% - 50vw);font-size:16px;line-height:1.5;user-select:none;-webkit-user-select:none;
+  overflow-x:clip}   /* the rooms and names waiting off to the right don't widen the page (a phone would zoom out to fit them) */
 #home #bar{position:absolute;left:0;top:20svh;white-space:nowrap;transition:transform .2s cubic-bezier(0,0,.2,1),opacity .15s;will-change:transform}
 .cat{position:relative;display:inline-block;width:240px;vertical-align:top;color:var(--muted);font-family:"Bebas Neue";font-size:22px;letter-spacing:.1em;transition:color .15s,opacity .15s;opacity:.35;cursor:pointer}
 /* sprites keep one pixel = 3 at both sizes: the canvas is its chosen size and renders at half res, shown at half size,
@@ -67,6 +68,28 @@
 #home #hint{position:absolute;right:48px;bottom:32px;color:var(--muted)}
 #hint b{font-weight:normal;color:var(--dim)}
 
+/* the dock (console.js decides it: a phone, or a touch screen with no room at the side). the plate is docked to the
+   screen instead of the item: at the foot in portrait, on the right in landscape. the chosen thing's name and kind are
+   in the plate, so the column shows the chosen one as its sprite alone and the others' names beside their small sprites.
+   the key hint is keys; a touch screen doesn't show it, and the plate's own key says tap. */
+#home.dock #bar{top:32px}
+#home.dock .cat,#home.dock .col{width:160px}
+#home.dock .item .t{margin-left:-56px}
+#home.dock .item.on .t{opacity:0}
+#home.dock #side{top:auto;left:16px;right:16px;bottom:16px;width:auto;padding:16px 20px 0}
+#home.dock #side .one{margin:8px 0 16px}
+#home.dock #side .band{margin:0 -20px;padding:12px 20px 16px}
+#home.dock #side dl{display:none}
+#home.dock #hint{display:none}
+@media (orientation:landscape){
+  #home.dock #bar{top:20svh}
+  #home.dock #side{top:calc(20svh + 104px);bottom:auto;left:400px;max-width:512px}    /* its top on the chosen sprite's frame, as at the side */
+}
+@media (orientation:landscape) and (max-height:500px){
+  #home.dock #bar{top:16px} #home.dock #side{top:120px}
+}
+@media (hover:none) and (pointer:coarse){ #home #hint{display:none} }
+
 /* an app: fullscreen, over everything. the black comes up over home and the weather and texture with it; the app
    element itself is never faded, so a sprite in flight inside it stays solid. layers: bg 0, weather 1, screen 2,
    top 3, the flight 8, texture 9. a .layer is one screen over its own weather; it makes no stacking context. */
@@ -89,10 +112,11 @@
 .app.out .top,.app.out .screen{opacity:0;transition:opacity .08s steps(2)}
 .app .top{position:absolute;left:48px;right:48px;top:28px;display:flex;justify-content:space-between;color:var(--muted);z-index:3}
 .app .top b{font-weight:normal;color:var(--accent2)}
-.app .top a{color:var(--muted);cursor:pointer}
+.app .top a{color:var(--muted);cursor:pointer;display:inline-block;padding:10px 6px;margin:-10px -6px}   /* a 44px target, drawn where it was */
 .app .top a:hover{color:var(--accent)}
 .app .top .n{color:var(--muted);margin:0 1ch}
-.app .screen{position:absolute;inset:0;overflow:auto;padding:96px 48px 96px;z-index:2;scroll-behavior:smooth;scrollbar-width:none}
+.app .screen{position:absolute;inset:0;overflow:auto;padding:96px 48px 96px;z-index:2;scroll-behavior:smooth;scrollbar-width:none;
+  overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:manipulation}
 .app .screen::-webkit-scrollbar{display:none}
 
 /* wares: one ware, one screen. the sprite stands in its bay on the left, pinned while you read — the flight lands
@@ -140,10 +164,10 @@
 .app-plain h1{font-family:"Bebas Neue";font-size:32px;font-weight:normal;margin:0 0 32px;color:var(--accent);letter-spacing:.08em}
 .app-plain .row{padding:16px 0;border-top:1px solid var(--hair)}
 .app-plain .row:last-child{border-bottom:1px solid var(--hair)}
-.app-plain .row a{color:var(--fg)} .app-plain .row a:hover{color:var(--accent)}
+.app-plain .row a{color:var(--fg);display:inline-block;padding:12px 0;margin:-12px 0}   /* 44px to a finger, drawn where it was */ .app-plain .row a:hover{color:var(--accent)}
 .app-plain .row small{display:block;color:var(--muted)}
 @media (max-width:760px){
-  #home #side{display:none} .cat,.col{width:160px}
+  .cat,.col{width:160px}
   .app .screen{padding:80px 20px 80px}
   /* stacked: the bay over the plate over the body, nothing pinned */
   .app-wares{--top:80px;--bay:288px}
@@ -153,21 +177,33 @@
   .app-wares .head{padding:16px 20px 0} .app-wares .spec{margin:20px -20px 0;padding:12px 20px 14px}
   .app-wares .plate h1{font-size:32px;line-height:32px;letter-spacing:.08em}
   .app-wares .more{padding:4px 20px 20px} .app-wares .fold{display:none}
+  .app-wares .spec .wx,.app-wares .more pre{overflow-wrap:anywhere} .app-wares .spec .wx{white-space:normal}   /* a long link or token wraps: the screen never scrolls sideways */
+}
+/* a phone's top bar is the controls: where you are is the plate's name, right under it */
+@media (max-width:559px){
+  .app .top{left:20px;right:20px;top:20px;justify-content:flex-end}
+  .app .top > span:first-child{display:none}
+  .app .top > span:last-child{display:flex;align-items:baseline;gap:0 20px}
+  .app .top .n{margin:0}
 }
 @media (prefers-reduced-motion:reduce){ .app,.app *{transition:none!important;animation:none!important} }
 
 /* press start: sits on the wall's foot, blinks the way a title screen does, and only while you're on the title. */
-#start{position:fixed;left:0;right:0;bottom:12svh;text-align:center;color:var(--accent);letter-spacing:.24em;font-size:16px;z-index:5;cursor:pointer;
+#start{position:fixed;left:0;right:0;bottom:calc(12svh - 14px);padding:14px 0;text-align:center;color:var(--accent);letter-spacing:.24em;font-size:16px;z-index:5;cursor:pointer;
   opacity:0;pointer-events:none;text-shadow:0 0 10px rgba(111,227,214,.45)}
 #start.on{opacity:1;pointer-events:auto;animation:blink 1.1s steps(1) infinite}
 /* the gate: black, one line, until the first press */
 #coin{display:none;position:fixed;left:0;right:0;bottom:12svh;text-align:center;color:var(--muted);letter-spacing:.24em;font-size:16px;z-index:5;animation:blink 1.1s steps(1) infinite}
 html.gate #coin{display:block}
+html.gate #home #side{visibility:hidden}   /* a hash that lands on home behind the gate: the plate waits with the rest */
 @keyframes blink{50%{opacity:.15}}
 #start:hover{animation:none}
 
-/* the page is a console: no free scroll. the cut drives scrollY so the wall's own weather still parallaxes. */
-html.console{overflow:hidden}
+/* the page is a console: no free scroll. the cut drives scrollY so the wall's own weather still parallaxes.
+   on touch the page doesn't pan either (console.js takes one finger), doesn't bounce or pull to refresh, and a double tap
+   doesn't zoom. a pinch still does. */
+html.console{overflow:hidden;overscroll-behavior:none;touch-action:manipulation}
+html.console body{overscroll-behavior:none;touch-action:manipulation}
 html.console{scrollbar-width:none} html.console::-webkit-scrollbar{display:none}
 /* home arrives: the bar slides in from the right as the cut lands, things fade up in step.
    the arrival owns translate and a from-opacity only; transform stays the bar's own transition, so a press during

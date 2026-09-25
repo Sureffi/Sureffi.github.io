@@ -23,6 +23,20 @@ const WORLD = [
 const ANCHOR_X = .34, ITEM_H = 96;
 const home = document.getElementById('home'), bar = document.getElementById('bar'), side = document.getElementById('side');
 let ci = 0, ii = WORLD.map(() => 0), restT, app = null;
+// a phone, or a touch screen too narrow for the plate at the side: the plate docks (at the foot in portrait, on the right
+// in landscape) and the chosen thing's name moves into it. the width is the layout viewport's, which a pinch doesn't move.
+const PHONE = matchMedia('(max-width:759px), (max-height:500px) and (pointer:coarse)'), TOUCH = matchMedia('(hover:none) and (pointer:coarse)'),
+  LAND = matchMedia('(orientation:landscape)');
+const vw = () => document.documentElement.clientWidth || innerWidth;
+let dock = false;
+function measureDock(){
+  const t = Math.max(...WORLD.flatMap(c => c.items.map(i => i.el.querySelector('.t').offsetWidth)));
+  const room = vw() - ((vw()*ANCHOR_X)|0) + 52 - (216 + t) - 48 - 48;              // the side plate's room, as showSide has it
+  dock = PHONE.matches || (TOUCH.matches && room < 352);
+  home.classList.toggle('dock', dock);
+}
+// in a dock the column keeps to the left gutter when the names wouldn't clear the screen (or the plate on the right)
+const anchor = () => dock && (LAND.matches || vw() < 600) ? 60 : (vw()*ANCHOR_X)|0;
 const night = mountWeather('night', home.querySelector('.weather'), { alpha:true });
 S.onPass = (dir, len) => night && night.pass(dir, len);
 
@@ -42,18 +56,18 @@ WORLD.forEach((c, x) => {
 // every piece of home has one resting place per (ci, ii); render only moves the targets and the transitions carry
 // it there. a transition retargets from wherever it is, so a press mid-move lands without a jump.
 function render(){
-  const bx = (innerWidth*ANCHOR_X - WORLD[ci].el.offsetLeft)|0; bar.style.transform = `translateX(${bx}px)`;
+  const bx = anchor() - WORLD[ci].el.offsetLeft; bar.style.transform = `translateX(${bx}px)`;
   WORLD.forEach((c, x) => {
     c.el.classList.toggle('on', x===ci); c.el.classList.toggle('l', x < ci);      // columns wait off to the side they're on
     c.col.style.transform = `translateY(${(-ii[x]*ITEM_H)|0}px)`;
     c.items.forEach((it, y) => { it.el.classList.toggle('on', x===ci && y===ii[x]); it.el.classList.toggle('above', y < ii[x]); it.el.classList.toggle('below', y > ii[x]); });
   });
   side.classList.remove('on'); clearTimeout(restT); restT = setTimeout(showSide, 220);
-  const it = WORLD[ci].items[ii[ci]]; if (side.parentNode !== it.el) it.el.appendChild(side);
+  const it = WORLD[ci].items[ii[ci]], host = dock ? home : it.el; if (side.parentNode !== host) host.appendChild(side);
   if (!app && state === 'home') history.replaceState(null, '', '#'+WORLD[ci].id+'/'+ii[ci]);
 }
 // a render that lands at once: first paint, resize
-function snap(){ home.classList.add('snap'); render(); void home.offsetWidth; home.classList.remove('snap'); }
+function snap(){ home.classList.add('snap'); measureDock(); render(); void home.offsetWidth; home.classList.remove('snap'); }
 // one step; a step past the edge is nothing, not a re-render
 function move(dx, dy){
   const x = Math.max(0, Math.min(WORLD.length-1, ci + dx)), y = Math.max(0, Math.min(WORLD[x].items.length-1, ii[x] + dy));
@@ -63,6 +77,8 @@ function move(dx, dy){
 // the side plate: the chosen thing, inspected. its top edge sits on the top of the sprite's frame; it stands clear of
 // the column's widest name, so it doesn't move while you walk a column. where it lives comes from the thing's own page.
 const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+// the plate is the chosen thing: a tap on it opens it, wherever it's docked
+side.onclick = e => { e.stopPropagation(); if (live()) launch(); };
 const shown = u => u.replace(/^https?:\/\//, '').replace(/\/$/, '');
 function where(c, y, it){
   if (it.href) return it.href.startsWith('mailto:') ? null : shown(it.href);
@@ -75,13 +91,16 @@ function showSide(){
   const facts = it.facts ? `<dl>${Object.entries(it.facts).map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>` : '';
   const live = at && at.toLowerCase() !== it.name.toLowerCase() ? `<p class="at">${at}</p>` : '<p class="at"></p>';
   side.innerHTML = `<i class="cm"></i><p class="kind">${it.kind}</p><h1>${it.name.toUpperCase()}</h1><p class="one">${it.one}</p>` +
-    `<div class="band">${facts}<div class="foot">${live}<span class="key"><b>enter</b>${it.href ? 'go' : 'open'}</span></div></div>`;
+    `<div class="band">${facts}<div class="foot">${live}<span class="key"><b>${TOUCH.matches ? 'tap' : 'enter'}</b>${it.href ? 'go' : 'open'}</span></div></div>`;
+  if (dock){ side.style.left = side.style.width = ''; side.classList.remove('tight'); }
+  else {
   // clear of the column's widest name, 48px on; never past the viewport's right gutter
   const right = Math.max(...c.items.map(i => { const t = i.el.querySelector('.t'); return t.offsetLeft + t.offsetWidth; }));
   side.style.left = right + 48 + 'px';
   // measured from where the bar is going, not where its transition is; too narrow to say it cleanly, it isn't shown
   const room = innerWidth - ((innerWidth*ANCHOR_X)|0) + 52 - right - 48 - 48;
   side.style.width = Math.min(512, room) + 'px'; side.classList.toggle('tight', room < 352);
+  }
   if (!still) decode(side.querySelector('h1'), 40, Math.max(10, 180/it.name.length)|0);
   side.classList.add('on');
 }
@@ -236,9 +255,13 @@ if (!root.classList.contains('boot')){ armStart(); if (state === 'title') holdWa
 else watchBoot();
 function pressStart(){ if (armed) go('home'); }
 // the gate: the one thing on the black before the boot. its press opens audio; the wall starts the breach on the same press.
-const coin = document.createElement('div'); coin.id = 'coin'; coin.textContent = '▸ PRESS ANY KEY'; document.body.appendChild(coin);
+const coin = document.createElement('div'); coin.id = 'coin'; coin.textContent = TOUCH.matches ? '▸ TOUCH THE SCREEN' : '▸ PRESS ANY KEY'; document.body.appendChild(coin);
+// a mouse or a key opens audio on the press. a finger's press doesn't count as a gesture for audio (chrome, safari): the
+// wall still starts the breach on it, and audio opens on the same finger's lift, a few ms on.
+let lift = false;
 addEventListener('keydown', () => { if (root.classList.contains('gate')) S.open(); }, true);
-addEventListener('pointerdown', () => { if (root.classList.contains('gate')) S.open(); }, true);
+addEventListener('pointerdown', e => { if (root.classList.contains('gate')){ if (e.pointerType === 'mouse') S.open(); else lift = true; } }, true);
+for (const ev of ['pointerup', 'touchend']) addEventListener(ev, () => { if (lift){ S.open(); if (ev === 'touchend') lift = false; } }, true);
 // the boot again: forget that it played, land on the title, reload
 // the boot again, in place: the wall runs its breach over, press start is disarmed until the name lands again
 function replay(){
@@ -279,6 +302,7 @@ addEventListener('keydown', e => {
 // on arrival, and walking up a column never runs on into the title — leaving takes a fresh gesture.
 let wheelAt = 0, wheelT = 0, spent = false;
 addEventListener('wheel', e => { if (app) return; e.preventDefault();
+  if (performance.now() - touchAt < 500) return;                         // a touch screen's own wheel, if it sends one: the swipe had it
   const now = performance.now(), fresh = now - wheelAt > 200; wheelAt = now; if (fresh) spent = false;
   if (moving || fl || spent || now - wheelT < 200 || (!e.deltaX && !e.deltaY)) return;
   if (state === 'title'){ if (e.deltaY > 0 && armed){ spent = true; go('home'); } return; }
@@ -288,16 +312,59 @@ addEventListener('wheel', e => { if (app) return; e.preventDefault();
   else if (ii[ci] > 0) move(0, -1);
   else if (fresh){ spent = true; go('title'); }                      // top of a column, a fresh wheel up: back to the title
 }, { passive:false });
-let tx0, ty0;
-addEventListener('touchstart', e => { tx0 = e.touches[0].clientX; ty0 = e.touches[0].clientY; }, { passive:true });
-addEventListener('touchend', e => { if (app || moving || fl) return; const dx = e.changedTouches[0].clientX - tx0, dy = e.changedTouches[0].clientY - ty0;
-  if (Math.max(Math.abs(dx), Math.abs(dy)) < 30) return;
-  if (state === 'title'){ if (dy < 0) pressStart(); return; }
-  if (Math.abs(dx) > Math.abs(dy)) move(-Math.sign(dx), 0);
+// a finger: one move per gesture. its axis locks on the first 10px; the move goes when it has come 36px along that axis
+// (more along it than across), and the rest of that finger is spent. a tap is left to be a click. on the title and home the
+// page never pans (no bounce, no pull-to-refresh); in an app the screen scrolls natively, and only a sideways swipe
+// (when nothing under the finger scrolls sideways) or a pull down from the screen's top is ours. two fingers, or a page
+// zoomed in, are the reader's: a pinch is never taken.
+const LOCK = 10, SWIPE = 36, PULL = 64;
+let g = null, touchAt = 0, swipedAt = 0;
+const zoomed = () => !!window.visualViewport && visualViewport.scale > 1.01;
+function sideways(el, stop){
+  for (; el && el !== stop; el = el.parentElement){
+    if (el.scrollWidth > el.clientWidth + 1){ const o = getComputedStyle(el).overflowX; if (o === 'auto' || o === 'scroll') return true; }
+  }
+  return stop.scrollWidth > stop.clientWidth + 1;
+}
+addEventListener('touchstart', e => {
+  touchAt = performance.now();
+  if (e.touches.length !== 1 || zoomed()){ g = null; return; }
+  const p = e.touches[0], scr = app && app.layer.querySelector('.screen'), on = scr && scr.contains(e.target);
+  g = { x:p.clientX, y:p.clientY, lock:null, done:false, scr, top: !!scr && scr.scrollTop <= 0, side: !!on && sideways(e.target, scr) };
+}, { passive:true });
+addEventListener('touchmove', e => {
+  touchAt = performance.now();
+  if (!g) return;
+  if (e.touches.length !== 1){ g = null; return; }                      // a second finger: a pinch, not ours
+  const p = e.touches[0], dx = p.clientX - g.x, dy = p.clientY - g.y;
+  if (!app && e.cancelable) e.preventDefault();
+  if (!g.lock){ if (Math.max(Math.abs(dx), Math.abs(dy)) < LOCK) return; g.lock = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y'; }
+  if (app && g.lock === 'x' && !g.side && e.cancelable) e.preventDefault();
+  if (g.done) return;
+  const along = g.lock === 'x' ? dx : dy, across = g.lock === 'x' ? dy : dx;
+  if (Math.abs(across) >= Math.abs(along)) return;                         // gone diagonal: not a swipe (yet)
+  if (app){
+    if (g.lock === 'x' && !g.side && Math.abs(dx) >= SWIPE){ g.done = true; stepApp(dx < 0 ? 1 : -1); }
+    else if (g.lock === 'y' && g.top && dy >= PULL && g.scr.scrollTop <= 0){ g.done = true; closeApp(); }
+    if (g.done) swipedAt = performance.now();
+    return;
+  }
+  if (Math.abs(along) < SWIPE) return;
+  g.done = true; swipedAt = performance.now();
+  if (moving || fl) return;                                              // a cut or a flight is one move: dropped, not queued
+  if (state === 'title'){ if (g.lock === 'y' && dy < 0) pressStart(); return; }
+  if (state !== 'home') return;
+  if (g.lock === 'x') move(dx < 0 ? 1 : -1, 0);
   else if (dy < 0) move(0, 1);
   else if (ii[ci] > 0) move(0, -1); else go('title');
-}, { passive:true });
+}, { passive:false });
+addEventListener('touchend', e => { if (!e.touches.length) g = null; }, { passive:true });
+addEventListener('touchcancel', () => { g = null; }, { passive:true });
+// the click a swipe might still make is the swipe's
+addEventListener('click', e => { if (performance.now() - swipedAt < 400){ e.stopPropagation(); e.preventDefault(); } }, true);
+// the url bar, a rotation, a keyboard: home's top is measured again. a pinch zoom changes the visual viewport only; it's left be.
 addEventListener('resize', () => { snap(); align(); });
+if (window.visualViewport) visualViewport.addEventListener('resize', () => { if (!zoomed()) align(); });
 new ResizeObserver(align).observe(document.querySelector('.masthead'));
 addEventListener('pageshow', e => { if (e.persisted) align(); });
 
@@ -314,3 +381,5 @@ function arrive(){
 }
 addEventListener('hashchange', () => { if (location.hash && !HASH.test(location.hash)) return; closeApp(true); arrive(); });
 arrive(); mountSprites();
+// the names' widths decide the dock on a touch screen; the font may land after the first measure
+if (document.fonts) document.fonts.ready.then(() => { const d = dock; measureDock(); if (d !== dock) snap(); });
