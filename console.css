@@ -73,10 +73,11 @@
    in the plate, so the column shows the chosen one as its sprite alone and the others' names beside their small sprites.
    the key hint is keys; a touch screen doesn't show it, and the plate's own key says tap. */
 #home.dock #bar{top:32px}
-#home.dock .cat,#home.dock .col{width:160px}
+#home.dock .cat,#home.dock .col{width:min(160px, calc((100vw - 60px) / 3))}   /* three rooms fit the screen from the gutter */
+#home.dock .cat{font-size:20px;letter-spacing:.06em} #home.dock .cat.on{letter-spacing:.12em}
 #home.dock .item .t{margin-left:-56px}
 #home.dock .item.on .t{opacity:0}
-#home.dock #side{top:auto;left:16px;right:16px;bottom:16px;width:auto;padding:16px 20px 0}
+#home.dock #side{top:auto;left:16px;right:16px;bottom:16px;width:auto;padding:16px 20px 0;background:rgba(4,7,11,.95)}   /* solid: the column runs on under it */
 #home.dock #side .one{margin:8px 0 16px}
 #home.dock #side .band{margin:0 -20px;padding:12px 20px 16px}
 #home.dock #side dl{display:none}
